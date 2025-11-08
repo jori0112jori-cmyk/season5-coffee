@@ -308,6 +308,46 @@ button#resetButton:hover {
     box-shadow: 0 10px 18px rgba(255, 112, 67, 0.35), 0 5px 6px rgba(0, 0, 0, 0.08);
 }
 
+/* === 時刻更新ボタン === */
+.time-input-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.time-input-container input[type="time"] {
+    flex: 1;
+}
+
+.time-update-btn {
+    flex-shrink: 0;
+    padding: 1.245rem; /* inputの高さと合わせるための調整 (約59.84px) */
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color var(--transition-speed) ease, transform 0.2s ease, box-shadow var(--transition-speed) ease;
+    box-shadow: 0 4px 8px rgba(102, 187, 106, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.time-update-btn:hover {
+    background-color: #5CB85C;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 187, 106, 0.3);
+}
+
+.time-update-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+
 /* === 結果表示エリア === */
 #output {
     background: linear-gradient(145deg, var(--output-bg-start), var(--output-bg-end)); /* 明るい青のグラデーション */
@@ -387,6 +427,34 @@ button#resetButton:hover {
     margin-top: 0.4rem; /* 上の値との間隔 */
     text-align: right;
 }
+
+/* === ▼▼▼ [新規追加] ページ上部へ移動ボタン ▼▼▼ === */
+.scroll-top-button {
+    background-color: var(--card-bg-color);
+    border: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.scroll-top-button:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+.scroll-top-button svg {
+    width: 18px;
+    height: 18px;
+}
+/* === ▲▲▲ [新規追加] ここまで ▲▲▲ === */
+
 
 /* === 生産量詳細表示 === */
 .workshop-production-display {
@@ -643,6 +711,7 @@ button#resetButton:hover {
     .k-m-notation {
         display: none; /* スマホではK/M表記を非表示にして簡潔に */
     }
+    
 }
     </style>
 </head>
@@ -777,7 +846,12 @@ button#resetButton:hover {
             <div id="reductionRateError" class="error-message"></div>
 
             <label for="nowTime" data-translate-key="currentTime">現在時刻（自動取得）:</label>
-            <input type="time" id="nowTime" readonly>
+            <div class="time-input-container">
+                <input type="time" id="nowTime" readonly>
+                <button type="button" id="updateTimeBtn" class="time-update-btn" data-translate-key="updateTimeBtnTitle" title="現在時刻に更新">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                </button>
+            </div>
             <div id="nowTimeError" class="error-message"></div>
         </section>
 
@@ -791,18 +865,19 @@ button#resetButton:hover {
     </div>
 
     <script>
+        // ▼▼▼ [JS 修正] 翻訳キーの変更 ▼▼▼
         const translations = {
             ja: {
                 // ラベルとタイトル
                 languageLabel: "言語:",
                 mainTitle: "コーヒー生産計算機",
-                versionDisplay: "v1.01（最終更新: 2025/11/3）",
-                workshopI: "工場Ⅰ:", // [修正] 短縮
-                workshopII: "工場Ⅱ:", // [修正] 短縮
-                workshopIII: "工場Ⅲ:", // [修正] 短縮
-                workshopIV: "工場Ⅳ:", // [修正] 短縮
+                versionDisplay: "v1.02（最終更新: 2025/11/8）",
+                workshopI: "工場Ⅰ:",
+                workshopII: "工場Ⅱ:",
+                workshopIII: "工場Ⅲ:",
+                workshopIV: "工場Ⅳ:",
                 weeklyDelivery: "週間配達:",
-                workshopName: "工場名", // [修正] 「工場」から「工場名」へ
+                workshopName: "工場名",
                 individualProductionTitle: "個別生産量詳細",
                 totalProduction: "総生産量:",
                 currentQuartz: "現在のコーヒー保有量:",
@@ -811,10 +886,12 @@ button#resetButton:hover {
                 reductionRate: "資源消費減少率（%）:",
                 currentTime: "現在時刻（自動取得）:",
                 scrollToResultTitle: "結果へ移動",
+                updateTimeBtnTitle: "現在時刻に更新",
                 // ボタン
                 calculateBtn: "計算",
                 saveBtn: "現在の値を保存",
                 resetBtn: "リセット",
+                scrollTopBtn: "ページ上部へ", // [新規追加]
                 // セレクトボックスの初期値
                 notBuilt: "未建造",
                 // 計算結果
@@ -835,19 +912,20 @@ button#resetButton:hover {
                 errorTargetLevel: "目標Lvは現在のLvより高く設定してください。",
                 errorInputCheck: "入力値を確認してください。",
                 errorZeroProduction: "合計生産量が0です。",
-                errorZeroProductionDetail: "合計生産量が0です。石英工房か週間配達のレベルを上げてください。",
+                errorZeroProductionDetail: "合計生産量が0です。工場か週間配達のレベルを上げてください。",
                 // アラート
                 alertSaved: "入力値を保存しました！",
                 alertSaveFailed: "入力値の保存に失敗しました。",
                 alertLoaded: "保存された入力値を読み込みました！",
                 confirmReset: "全ての入力値と保存データをリセットしますか？",
                 alertReset: "リセットしました！",
+                // (通知関連のキーは削除)
             },
             en: {
                 // Labels and Titles
                 languageLabel: "Language:",
                 mainTitle: "Coffee Production Calculator",
-                versionDisplay: "v1.01 (Last updated: 2025/11/3)",
+                versionDisplay: "v1.02 (Last updated: 2025/11/8)",
                 workshopI: "Coffee FactoryⅠ",
                 workshopII: "Coffee FactoryⅡ",
                 workshopIII: "Coffee FactoryⅢ",
@@ -862,10 +940,12 @@ button#resetButton:hover {
                 reductionRate: "Resource Consumption Reduction (%):",
                 currentTime: "Current Time (Auto):",
                 scrollToResultTitle: "Scroll to Result",
+                updateTimeBtnTitle: "Update to Current Time",
                 // Buttons
                 calculateBtn: "Calculate",
                 saveBtn: "Save Current Values",
                 resetBtn: "Reset",
+                scrollTopBtn: "Scroll to Top", // [New]
                 // Select Box Initial Value
                 notBuilt: "Not Built",
                 // Calculation Results
@@ -893,10 +973,14 @@ button#resetButton:hover {
                 alertLoaded: "Loaded saved input values!",
                 confirmReset: "Are you sure you want to reset all input values and saved data?",
                 alertReset: "Reset complete!",
+                // (Notification keys removed)
             }
         };
+        // ▲▲▲ [JS 修正] 翻訳キーの変更 ここまで ▲▲▲
 
         let currentLang = 'ja';
+        // (通知タイマーの変数は削除)
+
         const langBtnJa = document.getElementById('lang-ja');
         const langBtnEn = document.getElementById('lang-en');
 
@@ -924,11 +1008,27 @@ button#resetButton:hover {
                     else if(element.parentElement.tagName === 'H2') {
                         element.textContent = translations[lang][key];
                     } else {
-                        const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-                        if(textNode) {
-                           textNode.textContent = translations[lang][key];
-                        } else {
-                           element.innerText = translations[lang][key];
+                        if (element.id === 'updateTimeBtn') {
+                             element.setAttribute('title', translations[lang][key]);
+                        }
+                        else {
+                            const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '');
+                            if(textNode) {
+                               textNode.textContent = translations[lang][key];
+                            } else if (element.tagName === 'BUTTON' || element.tagName === 'SPAN' || element.tagName === 'LABEL') {
+                               let hasChildElements = false;
+                               for (let i = 0; i < element.childNodes.length; i++) {
+                                   if (element.childNodes[i].nodeType === 1) { // 1 == Element node
+                                       hasChildElements = true;
+                                       break;
+                                   }
+                               }
+                               if (!hasChildElements) {
+                                   element.innerText = translations[lang][key];
+                               }
+                            } else {
+                               element.innerText = translations[lang][key];
+                            }
                         }
                     }
                 }
@@ -945,9 +1045,9 @@ button#resetButton:hover {
 
         const PRODUCTION_PER_LEVEL = 720;
         const photoelectricLabQuartzNeeded = new Map([
-            [1, 782], [2, 11200], [3, 22400], [4, 44800], [5, 89600],
-            [6, 125400], [7, 163100], [8, 195700], [9, 234800], [10, 281800],
-            [11, 338101], [12, 405800], [13, 486901], [14, 584301], [15, 701200],
+            [1, 700], [2, 11200], [3, 22400], [4, 44800], [5, 89600],
+            [6, 125400], [7, 150500], [8, 180600], [9, 216800], [10, 261000],
+            [11, 312100], [12, 403900], [13, 444300], [14, 488800], [15, 537600],
             [16, 771301], [17, 848400], [18, 933301], [19, 1026600], [20, 1129301],
             [21, 1242200], [22, 1366400], [23, 1503000], [24, 1653301], [25, 1818700],
             [26, 2052800], [27, 2305900], [28, 2579100], [29, 2873800], [30, 3133500],
@@ -979,6 +1079,7 @@ button#resetButton:hover {
         const outputDiv = document.getElementById("output");
         const individualProductionHeader = document.getElementById("individualProductionHeader");
         const individualProductionContent = document.getElementById("individualProductionContent");
+        const updateTimeBtn = document.getElementById("updateTimeBtn");
 
         const workshopProductionSpans = {
             I: { hourly: document.getElementById("workshopIProduction"), daily: document.getElementById("workshopIProductionDaily"), levelDisplay: document.getElementById("workshopILevelDisplay") },
@@ -998,6 +1099,7 @@ button#resetButton:hover {
         };
 
         function clearErrors() {
+            // (通知タイマーのクリア処理は削除)
             Object.values(errorElements).forEach(el => {
                 if (el) {
                     el.textContent = '';
@@ -1112,6 +1214,8 @@ button#resetButton:hover {
             workshopProductionSpans.total.hourly.innerHTML = `${formatNumber(totalProduction)}<span class="k-m-notation">${getKSuffixText(totalProduction)}</span>`;
             workshopProductionSpans.total.daily.innerHTML = `${formatNumber(totalProduction * 24)}<span class="k-m-notation">${getKSuffixText(totalProduction * 24)}</span>`;
         }
+        
+        // (通知関連の関数は削除)
 
         function calculateQuartz(shouldScroll = false) {
             clearErrors();
@@ -1149,19 +1253,25 @@ button#resetButton:hover {
             let timeResultHtml = `<span class='info'>${T.outputAlreadyReached}</span>`;
             if (neededQuartz > 0) {
                 const minutesNeeded = (neededQuartz / totalProductionPerHour) * 60;
+                const millisecondsNeeded = minutesNeeded * 60 * 1000; // ミリ秒
+                
                 const now = new Date();
                 const [hour, minute] = nowTimeInput.value.split(":").map(Number);
                 now.setHours(hour, minute, 0, 0);
-                const endTime = new Date(now.getTime() + minutesNeeded * 60 * 1000);
+                const endTime = new Date(now.getTime() + millisecondsNeeded);
                 
                 const timeString = `${Math.floor(minutesNeeded/60)}${T.outputHours} ${Math.floor(minutesNeeded % 60)}${T.outputMinutes}`;
                 const arrivalString = `${endTime.getMonth() + 1}/${endTime.getDate()} ${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`;
                 
                 timeResultHtml = `${T.outputArrivalPrefix} <span class="time">${timeString}</span>
                                   <br><span class="arrival-time-emphasis">${arrivalString} ${T.outputArrivalSuffix}</span>`;
+                                  
+                // (通知スケジュールの呼び出しは削除)
             }
 
             const notBuiltText = T.notBuilt;
+            
+            // ▼▼▼ [JS 修正] innerHTMLの末尾に「上へ移動」ボタンを追加 ▼▼▼
             outputDiv.innerHTML = `
                 <p><span>${T.outputTarget}</span> <span class="info">${currentLabLevel === 0 ? notBuiltText : `Lv.${currentLabLevel}`} → Lv.${targetLevel}</span></p>
                 <p><span>${T.outputVirusResistance}</span> <span class="info">${currentLabLevel === 0 ? formatNumber(currentVirusResistance) : `  ${formatNumber(currentVirusResistance)}`} →  ${formatNumber(targetVirusResistance)}</span></p>        
@@ -1170,7 +1280,15 @@ button#resetButton:hover {
                 <p class="adjusted-margin-top"><span>${T.outputActualNeeded}</span> <span class="target">${formatNumber(requiredQuartzAfterReduction)} ${getKSuffixText(requiredQuartzAfterReduction)}<span class="reduction-amount">(${T.outputReductionAmount} ${formatNumber(reductionAmount)})</span></span></p>
                 <p><span>${T.outputShortage}</span> <span class="needed">${formatNumber(neededQuartz)} ${getKSuffixText(neededQuartz)}</span></p>
                 <p><span>${T.outputTimeToComplete}</span> <span>${timeResultHtml}</span></p>
+                
+                <p style="border-bottom: none; padding-bottom: 0; margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                    <button type="button" id="scrollTopBtn" class="scroll-top-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                        <span data-translate-key="scrollTopBtn">${T.scrollTopBtn}</span>
+                    </button>
+                </p>
             `;
+            // ▲▲▲ [JS 修正] ここまで ▲▲▲
 
             if (shouldScroll) {
                 outputDiv.scrollIntoView({ behavior: 'smooth' });
@@ -1286,6 +1404,13 @@ button#resetButton:hover {
                 setLanguage('en');
                 try { localStorage.setItem('calculatorLang', 'en'); } catch(e) { console.error("Could not save language setting"); }
             });
+            
+            updateTimeBtn.addEventListener('click', () => {
+                setNowTime();
+                if (outputDiv.innerHTML.trim() !== '') {
+                    calculateQuartz(false);
+                }
+            });
 
             individualProductionHeader.addEventListener("click", () => {
                 individualProductionHeader.classList.toggle("collapsed");
@@ -1308,9 +1433,23 @@ button#resetButton:hover {
             
             [workshopILevelSelect, workshopIILevelSelect, workshopIIILevelSelect, workshopIVLevelSelect, weeklyDeliveryLevelSelect]
             .forEach(element => element.addEventListener("change", updateProductionDisplay));
+            
+            // ▼▼▼ [JS 修正] ページ上部へ移動ボタンのイベントリスナー（イベント委任） ▼▼▼
+            outputDiv.addEventListener('click', function(e) {
+                // クリックされた要素が #scrollTopBtn か、その子要素（SVGやSPAN）かを確認
+                const btn = e.target.closest('#scrollTopBtn');
+                if (btn) {
+                    // ページ（ウィンドウ）の最上部へスクロール
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+            // ▲▲▲ [JS 修正] ここまで ▲▲▲
+            
+            // (通知許可のリクエストは削除)
         });
     </script>
 </body>
 
 </html>
+
 
