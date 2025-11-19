@@ -1,1470 +1,716 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
-    <title>コーヒー生産計算機</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>LastWar S5 コーヒー生産計算機 (Lv60対応)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-:root {
-    /* === カラーパレット === */
-    --primary-color: #43A047;      /* 深い緑 - メインの見出しや保存ボタン (彩度調整) */
-    --secondary-color: #66BB6A;    /* やや明るい緑 - 計算ボタン */
-    --tertiary-color: #FF7043;     /* 落ち着いたオレンジ - エラーやリセットボタン */
-    --accent-color: #26C6DA;       /* 穏やかなターコイズ - フォーカスや強調 */
-    --text-color: #333333;         /* 濃いグレー - 主なテキスト */
-    --light-text-color: #757575;   /* 標準的なグレー - サブテキスト */
-    --bg-color: #E8F5E9;           /* ごく薄い緑 - 背景の開始色 */
-    --bg-color-end: #C8E6C9;       /* 少し濃い薄い緑 - 背景の終了色 */
-    --card-bg-color: #FFFFFF;      /* 白 */
-    --border-color: #BDBDBD;       /* 中間的な灰色のボーダー */
-    --input-bg-color: #FFFFFF;     /* 非常に薄いオフホワイト -> 白に変更 */
-
-    /* === 結果表示の色調整 === */
-    --output-bg-start: #E0F7FA;     /* 薄い水色 (より控えめに) */
-    --output-bg-end: #B2EBF2;       /* やや濃い水色 */
-    --output-production-color: #388E3C; /* 深い緑 */
-    --output-target-color: #1976D2;     /* 落ち着いた青 */
-    --output-needed-color: #D32F2F;     /* 落ち着いた赤 */
-    --output-time-color: #673AB7;       /* 落ち着いた紫 */
-    --output-info-color: #333333;       /* テキスト色と合わせる */
-    --output-reduction-color: #00897B; /* 暗いターコイズグリーン */
-
-    /* === シャドウ、角丸、フォントサイズ === */
-    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.06); /* シャドウを少し弱める */
-    --shadow-medium: 0 8px 20px rgba(0, 0, 0, 0.10); /* シャドウを少し弱める */
-    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.04); /* インセットシャドウを弱める */
-    --border-radius: 10px;         /* 角丸を少し小さく */
-    --font-size-base: 1.1rem;      /* 17.6px (PCの基本フォントサイズを微増) */
-    --font-size-lg: 1.25rem;       /* 20px (調整) */
-    --font-size-xl: 2rem;          /* 32px (見出しをより大きく) */
-    --font-size-sm: 0.9rem;        /* 14.4px (少し小さく) */
-    --transition-speed: 0.3s;
-}
-
-/* === 基本スタイル === */
-body {
-    font-family: 'Noto Sans JP', 'ヒラギノ角ゴ ProN W3', 'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, 'ＭＳ Ｐゴシック', 'MS PGothic', sans-serif;
-    margin: 0;
-    padding: 3.5rem; /* 全体の余白を少し増やす */
-    color: var(--text-color);
-    line-height: 1.65; /* 行間を微調整して読みやすく */
-    background: linear-gradient(145deg, var(--bg-color), var(--bg-color-end)); /* 背景をグラデーションに */
-    font-size: var(--font-size-base);
-    -webkit-font-smoothing: antialiased; /* フォントを滑らかに */
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.container {
-    max-width: 900px; /* 最大幅をさらに広げる */
-    margin: 2rem auto;
-    padding: 2.5rem; /* 内側の余白を増やす */
-    background-color: var(--card-bg-color);
-    border-radius: var(--border-radius);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), /* シャドウを全体的に柔らかく */
-                0 6px 10px rgba(0, 0, 0, 0.04); /* シャドウを全体的に柔らかく */
-    position: relative;
-    border: 1px solid #e0e0e0; /* 軽いボーダーを追加 */
-}
-
-/* === ここから言語切替ボタンのスタイルを追加・修正 === */
-.lang-switcher-container {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    display: flex;
-    gap: 0.75rem; /* ボタン間のスペース */
-}
-
-.lang-btn {
-    background-color: var(--card-bg-color); /* 変更: 背景色を白に */
-    border: 2px solid var(--border-color); /* 変更: 非アクティブ時も枠線を表示 */
-    border-radius: 8px;
-    padding: 0.4rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    opacity: 0.7; /* 変更: 少し濃く */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* 追加: 軽い影 */
-}
-
-.lang-btn:hover {
-    opacity: 1;
-    transform: translateY(-2px);
-    background-color: var(--card-bg-color); /* 変更: ホバー時も白 */
-    border-color: var(--secondary-color); /* 変更: ホバー時のボーダー色 */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.08); /* 変更: ホバー時の影 */
-}
-
-.lang-btn.active {
-    opacity: 1;
-    border-color: var(--accent-color); /* アクティブなボタンに枠線を表示 */
-    box-shadow: 0 0 8px rgba(38, 198, 218, 0.3), 0 2px 4px rgba(0,0,0,0.05); /* 変更: アクティブ時の影を調整 */
-}
-
-.flag-icon {
-    width: 32px; /* アイコンサイズを調整 */
-    height: auto;
-    border-radius: 4px; /* アイコンに少し角丸 */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-/* === ここまで追加・修正 === */
-
-
-h2 {
-    display: flex; /* Flexboxを適用 */
-    flex-direction: column; /* 子要素を縦に並べる */
-    align-items: center; /* 中央揃え */
-    gap: 0.3rem; /* 各行の間のスペース */
-    text-align: center;
-    margin-bottom: 2.8rem; /* 間隔を広げる */
-    color: var(--primary-color);
-    font-size: var(--font-size-xl);
-    border-bottom: 2px dashed var(--primary-color); /* 下線を控えめな点線に変更 */
-    padding-bottom: 1.5rem; /* 下線との間隔を広げる */
-    font-weight: 900; /* より太くしてインパクトを出す */
-    letter-spacing: 0.02em; /* 文字間隔を調整 (日本語向けに狭める) */
-    text-shadow: none; /* テキストシャドウをなくす */
-}
-
-.game-subtitle {
-    font-size: 0.6em; /* サブタイトルを少し大きく */
-    color: var(--light-text-color);
-    font-weight: 400;
-    letter-spacing: 0.05em; /* 文字間隔を調整 */
-}
-
-.version-display {
-    font-size: 0.5em;
-    color: var(--light-text-color);
-    font-weight: 400;
-}
-
-label {
-    display: block;
-    margin-top: 1.8rem; /* マージンを広げる */
-    margin-bottom: 0.8rem;
-    font-size: var(--font-size-base);
-    font-weight: 700;
-    color: var(--text-color);
-    letter-spacing: 0.03em;
-}
-
-/* === プルダウンと入力欄の共通スタイル === */
-select,
-input[type="number"],
-input[type="time"],
-input[type="text"] {
-    width: 100%;
-    padding: 0.9rem; /* パディングを微調整 */
-    border: 1px solid var(--border-color); /* ボーダーを細く */
-    border-radius: var(--border-radius);
-    background-color: var(--input-bg-color);
-    font-size: var(--font-size-base);
-    box-sizing: border-box;
-    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
-    box-shadow: var(--shadow-inset); /* インセットシャドウで窪み感を出す */
-}
-
-select:focus,
-input[type="number"]:focus,
-input[type="time"]:focus,
-input[type="text"]:focus {
-    border-color: var(--accent-color); /* フォーカス時にアクセントカラー */
-    box-shadow: 0 0 0 3px rgba(38, 198, 218, 0.2), /* 鮮やかなフォーカスリング (透明度を下げた) */
-                inset 0 2px 4px rgba(0, 0, 0, 0.06); /* インセットシャドウを少し強く */
-    outline: none;
-}
-
-/* エラー時の入力フィールドのスタイル */
-.input-error {
-    border-color: var(--tertiary-color) !important;
-    box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.2) !important; /* 透明度を下げた */
-}
-
-/* カスタムセレクトボックスの矢印 */
-select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23757575%22%20d%3D%22M287%2C114.7L159.3%2C242.5c-8.8%2C8.8-23.2%2C8.8-32%2C0L5.4%2C114.7c-8.8-8.8-8.8-23.2%2C0-32l22.7-22.7c8.8-8.8%2C23.2-8.8%2C32%2C0l96.6%2C96.4l96.6-96.4c8.8-8.8%2C23.2-8.8%2C32%2C0l22.7%2C22.7C295.8%2C91.5%2C295.8%2C105.9%2C287%2C114.7z%22%2F%3E%3C%2Fsvg%3E');
-    background-repeat: no-repeat;
-    background-position: right 1.2rem center;
-    background-size: 1.1rem;
-    padding-right: 3.5rem; /* 矢印との隙間を確保 */
-}
-
-.main-inputs-grid, .calculation-inputs {
-    display: grid;
-    gap: 1rem;
-}
-
-.quartz-workshop-inputs {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 最小幅を少し広げる */
-    gap: 2rem; /* 間隔を広げる */
-    margin-bottom: 1rem;
-}
-
-.quartz-workshop-inputs div, .weekly-delivery-input {
-    display: flex;
-    flex-direction: column;
-}
-
-.quartz-workshop-inputs label, .weekly-delivery-input label {
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-}
-
-.weekly-delivery-input {
-    margin-top: 1rem;
-}
-
-div#output p.adjusted-margin-top {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-/* === ボタン共通スタイル === */
-.button-group {
-    display: flex;
-    gap: 1.5rem; /* 間隔を広げる */
-    margin-top: 3rem;
-    flex-wrap: wrap; /* 必要に応じて折り返し */
-    width: 100%; /* 親要素の幅いっぱいに広げる */
-}
-
-.button-group button { /* button-group内のbuttonに適用 */
-    flex: 1; /* 利用可能なスペースを均等に分配 */
-    min-width: 150px; /* 必要に応じてボタンの最小幅を設定 */
-    padding: 1.1rem 1.8rem; /* パディングを微調整 */
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    border-radius: 8px; /* 角丸を少し小さく */
-    font-size: var(--font-size-lg);
-    cursor: pointer;
-    transition: background-color var(--transition-speed) ease, transform 0.2s ease, box-shadow var(--transition-speed) ease;
-    box-shadow: 0 6px 12px rgba(102, 187, 106, 0.25), /* secondary-colorのシャドウ (透明度を下げた) */
-                0 3px 4px rgba(0, 0, 0, 0.06); /* 二重シャドウで奥行き (透明度を下げた) */
-    font-weight: 700;
-    position: relative; /* z-indexのため */
-    overflow: hidden; /* ホバーエフェクトのため */
-    z-index: 1;
-}
-
-button:hover {
-    background-color: #5CB85C; /* ホバー時の色 (secondary-colorより少し暗く) */
-    transform: translateY(-4px); /* 動きを強調 (少し弱める) */
-    box-shadow: 0 10px 18px rgba(102, 187, 106, 0.35), /* ホバー時シャドウをさらに強調 (透明度を下げた) */
-                0 5px 6px rgba(0, 0, 0, 0.08);
-    z-index: 2; /* ホバー時に手前に */
-}
-
-button:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 8px rgba(102, 187, 106, 0.2);
-}
-
-/* ホバー時の光沢エフェクト */
-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent); /* 光沢を少し弱く */
-    transition: all .5s ease;
-    z-index: -1;
-}
-
-button:hover::before {
-    left: 100%;
-}
-
-/* 保存ボタンの色をprimary-color系に */
-button#saveButton {
-    background-color: var(--primary-color);
-    box-shadow: 0 6px 12px rgba(67, 160, 71, 0.25), 0 3px 4px rgba(0, 0, 0, 0.06);
-}
-
-button#saveButton:hover {
-    background-color: #388E3C; /* ホバー時の色 (primary-colorより少し暗く) */
-    box-shadow: 0 10px 18px rgba(67, 160, 71, 0.35), 0 5px 6px rgba(0, 0, 0, 0.08);
-}
-
-/* リセットボタンの色をtertiary-color系に */
-button#resetButton {
-    background-color: var(--tertiary-color);
-    box-shadow: 0 6px 12px rgba(255, 112, 67, 0.25), 0 3px 4px rgba(0, 0, 0, 0.06);
-}
-
-button#resetButton:hover {
-    background-color: #E64A19; /* ホバー時の色 (tertiary-colorより少し暗く) */
-    box-shadow: 0 10px 18px rgba(255, 112, 67, 0.35), 0 5px 6px rgba(0, 0, 0, 0.08);
-}
-
-/* === 時刻更新ボタン === */
-.time-input-container {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.time-input-container input[type="time"] {
-    flex: 1;
-}
-
-.time-update-btn {
-    flex-shrink: 0;
-    padding: 1.245rem; /* inputの高さと合わせるための調整 (約59.84px) */
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color var(--transition-speed) ease, transform 0.2s ease, box-shadow var(--transition-speed) ease;
-    box-shadow: 0 4px 8px rgba(102, 187, 106, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    box-sizing: border-box;
-}
-
-.time-update-btn:hover {
-    background-color: #5CB85C;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(102, 187, 106, 0.3);
-}
-
-.time-update-btn svg {
-    width: 20px;
-    height: 20px;
-}
-
-
-/* === 結果表示エリア === */
-#output {
-    background: linear-gradient(145deg, var(--output-bg-start), var(--output-bg-end)); /* 明るい青のグラデーション */
-    border: 1px solid var(--output-bg-end);
-    padding: 2.2rem; /* パディングを微調整 */
-    margin-top: 3rem; /* 上のマージンを増やす */
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-base); /* 結果表示の基本フォントサイズを元のサイズに */
-    color: var(--text-color);
-    box-shadow: var(--shadow-inset);
-}
-
-#output p {
-    display: grid; /* グリッドレイアウトに変更 */
-    grid-template-columns: minmax(200px, 1fr) auto; /* 項目名と値の2列 */
-    gap: 1rem; /* 列間の隙間 */
-    align-items: center; /* 垂直方向の中央揃え */
-    margin-bottom: 1.2rem; /* 行間のマージンを微調整 */
-    padding-bottom: 0.8rem; /* 下線とのスペース */
-    border-bottom: 1px dotted rgba(189, 189, 189, 0.7); /* より柔らかい点線に */
-}
-
-#output p:last-child {
-    margin-bottom: 0;
-    border-bottom: none;
-}
-
-#output p span:first-child {
-    font-weight: 700;
-    color: var(--text-color);
-    text-align: left;
-}
-
-#output p span:last-child {
-    text-align: right;
-    font-weight: 900;
-    font-size: 1.05em; /* 値のフォントサイズを項目名より少し大きく */
-    font-family: 'Roboto Mono', 'Space Mono', monospace; /* 等幅フォントを適用 */
-    white-space: nowrap; /* 値が改行されないようにする */
-}
-
-/* フォントのフォールバック */
-@supports not (font-variation-settings: normal) {
-    #output p span:last-child {
-        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    }
-}
-
-/* 結果表示の色分け */
-.production { color: var(--output-production-color); }
-.target { color: var(--output-target-color); }
-.needed {
-    color: var(--output-needed-color);
-    font-weight: 900;
-    font-size: 1.1em; /* さらに大きく (微調整) */
-}
-.time { color: var(--output-time-color); }
-.info { color: var(--output-info-color); font-weight: 700; }
-
-/* 到達時刻を強調するためのスタイル */
-.arrival-time-emphasis {
-    color: white;
-    background-color: var(--accent-color);
-    padding: 0.5rem 1rem; /* パディングを微調整 */
-    border-radius: 6px; /* 角丸を調整 */
-    display: inline-block;
-    box-shadow: 0 3px 8px rgba(38, 198, 218, 0.25); /* シャドウを強調 (透明度を下げた) */
-    font-size: 1.1em; /* さらに大きく (微調整) */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.reduction-amount {
-    color: var(--output-reduction-color);
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    display: block; /* 常に改行して表示 */
-    margin-top: 0.4rem; /* 上の値との間隔 */
-    text-align: right;
-}
-
-/* === ▼▼▼ [新規追加] ページ上部へ移動ボタン ▼▼▼ === */
-.scroll-top-button {
-    background-color: var(--card-bg-color);
-    border: 2px solid var(--secondary-color);
-    color: var(--secondary-color);
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all var(--transition-speed) ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.scroll-top-button:hover {
-    background-color: var(--secondary-color);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-light);
-}
-.scroll-top-button svg {
-    width: 18px;
-    height: 18px;
-}
-/* === ▲▲▲ [新規追加] ここまで ▲▲▲ === */
-
-
-/* === 生産量詳細表示 === */
-.workshop-production-display {
-    background: linear-gradient(145deg, #F9FBE7, #E6EE9C); /* 薄い黄緑のグラデーション (より明るく微調整) */
-    border: 1px solid #DCE775;
-    padding: 1.8rem;
-    margin-top: 2.5rem; /* 上のマージンを増やす */
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-inset);
-}
-
-/* ▼▼▼ 横幅の比率を修正 ▼▼▼ */
-.production-display-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* 1列目を広く */
-    gap: 1rem;
-    font-weight: 700;
-    color: var(--light-text-color);
-    margin-bottom: 1rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 1px solid var(--border-color);
-    font-size: var(--font-size-sm);
-}
-
-.production-display-header > span:not(:first-child) {
-    text-align: right;
-}
-
-.collapsible-content p {
-    margin: 0.8rem 0;
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* 1列目を広く */
-    align-items: center;
-    gap: 1rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 1px dotted #d0e0ed; /* より柔らかい点線 */
-}
-/* ▲▲▲ ここまで修正 ▲▲▲ */
-
-
-.collapsible-content p:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.workshop-name-level {
-    display: flex;
-    align-items: baseline; /* テキストのベースラインで揃える */
-    gap: 0.75rem; /* 工房名とレベル表示の間のスペース */
-}
-
-.workshop-name-level > [data-translate-key] {
-    font-weight: 700;
-    color: var(--text-color);
-}
-
-.level-display {
-    font-size: 0.9em;
-    color: var(--light-text-color);
-    font-weight: 400;
-    font-family: 'Roboto Mono', 'Space Mono', monospace; /* 他の数値とフォントを合わせる */
-}
-
-/* ▼▼▼ 横幅の比率を修正 ▼▼▼ */
-.workshop-production-display > .total-production-row {
-    font-size: 1.25rem;
-    font-weight: 900;
-    color: var(--text-color);
-    margin-top: 1.2rem;
-    padding-top: 1.2rem;
-    border-top: 2px solid #b0c4de;
-    border-bottom: none;
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* 1列目を広く */
-    gap: 1rem;
-    align-items: center;
-}
-/* ▲▲▲ ここまで修正 ▲▲▲ */
-
-
-.hourly-display,
-.daily-display {
-    white-space: nowrap;
-    text-align: right;
-    font-family: 'Roboto Mono', 'Space Mono', monospace;
-    font-weight: 700; /* 数字を太く */
-    color: var(--light-text-color);
-}
-
-.total-production-row .hourly-display,
-.total-production-row .daily-display {
-    color: var(--text-color);
-}
-
-.k-m-notation {
-    font-size: 0.8em;
-    color: var(--light-text-color);
-    margin-left: 0.5em; /* 桁区切り数字との間隔 */
-    display: inline-block;
-    min-width: 50px;
-    text-align: left;
-}
-
-/* エラーメッセージのスタイル */
-.error-message {
-    color: var(--tertiary-color);
-    font-size: var(--font-size-sm);
-    margin: 0;
-    padding: 0;
-    max-height: 0; /* 高さを0にする */
-    opacity: 0;
-    overflow: hidden; /* はみ出しを隠す */
-    transition: all 0.3s ease-in-out; /* スムーズなトランジション */
-    font-weight: 600;
-    margin-top: 0;
-    line-height: 1.4; /* 行間を調整 */
-}
-
-.error-message.active {
-    max-height: 5rem; /* 十分な高さを確保 */
-    opacity: 1;
-    margin-top: 0.8rem; /* 上マージンを追加 (少し増やす) */
-}
-
-/* === 折りたたみ機能のスタイル === */
-.collapsible-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: rgba(255, 255, 255, 0.5); /* 半透明の背景 */
-    padding: 0.8rem 1.2rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    font-weight: 700;
-    color: var(--text-color);
-    transition: background-color 0.3s ease;
-    border: 1px solid #DCE775;
-}
-
-.collapsible-header:hover {
-    background-color: rgba(255, 255, 255, 0.8);
-}
-
-.collapsible-header .arrow {
-    transition: transform 0.3s ease;
-    font-size: 1.2em;
-}
-
-.collapsible-header.collapsed .arrow {
-    transform: rotate(-90deg);
-}
-
-.collapsible-content {
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.4s ease-out, padding 0.4s ease-out;
-    padding: 0; /* 閉じているときはパディング0 */
-}
-
-.collapsible-content.expanded {
-    max-height: 500px; /* 十分な高さを確保 */
-    padding-bottom: 1rem; /* 開いているときにパディングを追加 */
-}
-
-/* === レスポンシブ対応 === */
-@media screen and (max-width: 768px) {
-    body {
-        padding: 1rem;
-        font-size: 1rem; /* モバイルの基本フォントサイズを16pxに */
-    }
-
-    .container {
-        padding: 1.5rem;
-        margin: 1rem auto;
-    }
-    
-    .lang-switcher-container {
-        position: static;
-        justify-content: flex-end;
-        margin-bottom: 1rem;
-    }
-
-    h2 {
-        font-size: 1.6rem; /* タイトルのフォントサイズを微調整 */
-        margin-bottom: 2rem;
-    }
-
-    .quartz-workshop-inputs {
-        grid-template-columns: repeat(2, 1fr); /* スマホでは2列に */
-        gap: 1.2rem;
-    }
-
-    #output p {
-        display: flex;
-        flex-flow: row wrap; /*回り込みを許可*/
-        justify-content: space-between; /*両端揃え*/
-        align-items: center;
-        gap: 0.2rem 0.5rem; /*行間と列間のスペース*/
-    }
-
-    #output p span:first-child {
-        margin-bottom: 0;
-    }
-
-    #output p span:last-child, .reduction-amount {
-        text-align: right;
-        flex-grow: 1; /*残りのスペースを埋める*/
-    }
-
-
-    .arrival-time-emphasis {
-        width: 100%;
-        box-sizing: border-box;
-        text-align: center;
-        margin-top: 0.5rem;
-    }
-
-    /* ▼▼▼ スマホ表示の横幅比率を修正 ▼▼▼ */
-    .production-display-header {
-        grid-template-columns: 1.5fr 1fr 1fr; /* 1列目を広く */
-        gap: 0.5rem;
-    }
-    
-    .collapsible-content p, .total-production-row {
-        grid-template-columns: 1.5fr 1fr 1fr; /* 1列目を広く */
-        gap: 0.5rem;
-        font-size: 0.9rem;
-    }
-    /* ▲▲▲ ここまで修正 ▲▲▲ */
-
-    /* ▼▼▼ [修正] スマホ表示時の「未建造」改行対策 ▼▼▼ */
-    .workshop-name-level {
-        gap: 0.5rem; /* 工場名とレベル表示の隙間を少し詰める */
-        align-items: center; /* 垂直方向の中央揃えにする */
-    }
-    .level-display {
-        font-size: 0.85em; /* レベル表示(未建造含む)のフォントを少し小さくする */
-    }
-    /* ▲▲▲ [修正] ここまで追加 ▲▲▲ */
-
-
-    .button-group {
-        flex-direction: column; /* スマホでは縦並びにする */
-        gap: 1rem;
-    }
-    .button-group button { /* スマホではボタンのflexを解除して100%幅にする */
-        flex: none;
-        width: 100%;
-    }
-
-
-    .k-m-notation {
-        display: none; /* スマホではK/M表記を非表示にして簡潔に */
-    }
-    
-}
+        :root {
+            /* S5 テーマカラー */
+            --primary: #2E7D32;       /* 濃い緑 */
+            --secondary: #4CAF50;     /* 明るい緑 */
+            --accent: #FF7043;        /* オレンジアクセント */
+            --bg-body: #F1F8E9;       /* 薄い背景緑 */
+            --bg-card: #FFFFFF;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border: #C8E6C9;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* ヘッダーエリア */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* 上揃えに変更 */
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            flex: 1; /* タイトルがスペースを埋める */
+        }
+        .subtitle { font-size: 0.8rem; color: var(--text-sub); font-weight: normal; }
+
+        /* 言語切り替えボタン */
+        .lang-switch {
+            display: flex;
+            gap: 8px; /* ボタン間隔を少し広げる */
+            flex-shrink: 0; /* 縮小しない */
+        }
+        .lang-btn {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 8px; /* サイズ拡大 */
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lang-btn.active { opacity: 1; border-color: var(--primary); box-shadow: 0 0 5px rgba(46,125,50,0.3); }
+        .flag-icon { width: 28px; height: auto; display: block; } /* アイコンサイズ拡大 */
+
+        /* カード共通スタイル */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin: 0 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px dashed var(--border);
+            color: var(--primary);
+        }
+
+        /* グリッドレイアウト */
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
+
+        /* 入力フォーム */
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 4px; }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #FAFAFA;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        /* 生産量表示（リアルタイム） */
+        .prod-val {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            font-family: 'Roboto Mono', monospace;
+            margin-top: 2px;
+            white-space: nowrap; 
+        }
+
+        /* ボタン群 */
+        .btn-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 20px; 
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+            font-size: 1rem;
+            /* フレックスボックス内での縮小を許可しつつ、最低限の幅を確保 */
+            min-width: 0; 
+            white-space: nowrap; /* 文字折り返し防止 */
+        }
+        .btn-calc { background: var(--primary); }
+        .btn-calc:hover { background: #1B5E20; transform: translateY(-2px); }
+        
+        .btn-save { background: var(--secondary); }
+        .btn-save:hover { background: #388E3C; }
+        
+        .btn-reset { background: var(--accent); }
+        .btn-reset:hover { background: #D84315; }
+
+        /* 結果表示エリア */
+        #result-area {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border: 1px solid #A5D6A7;
+            display: none; 
+        }
+        #result-area.show { display: block; animation: fadeIn 0.5s; }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dotted rgba(0,0,0,0.1);
+        }
+        .result-row:last-child { border-bottom: none; }
+        
+        .res-label { font-size: 0.9rem; }
+        .res-val { font-weight: bold; font-family: 'Roboto Mono', monospace; font-size: 1.1rem; }
+        
+        .res-highlight { color: #D32F2F; font-size: 1.2rem; }
+        
+        /* 達成時刻の強調スタイル */
+        .arrival-box {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #C2185B;
+        }
+
+        .res-time { 
+            color: #C2185B; 
+            font-weight: 900; 
+            font-size: 2.8rem; 
+            line-height: 1.1;
+            display: block;
+            margin: 5px 0;
+            text-shadow: 2px 2px 0px rgba(255,255,255,1);
+        }
+        
+        .res-date { 
+            display: block; 
+            font-size: 1.2rem; 
+            color: #333; 
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .km-suffix {
+            font-size: 0.75em;
+            color: #555;
+            margin-left: 4px;
+            font-weight: normal;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* スマホ調整 */
+        @media (max-width: 600px) {
+            body { padding: 15px; }
+            
+            /* ヘッダー調整 */
+            h1 { font-size: 1.2rem; }
+            .lang-switch { gap: 6px; }
+            .flag-icon { width: 32px; } /* スマホでさらに大きく */
+
+            /* ボタンを横並びに維持 */
+            .btn-group { 
+                flex-direction: row; 
+                gap: 8px; 
+            }
+            
+            /* ボタンの文字サイズと余白を調整して一行に収める */
+            .btn {
+                padding: 12px 2px; /* 横パディングを減らす */
+                font-size: 0.85rem; /* 文字サイズを少し小さく */
+            }
+
+            .grid-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .res-time { font-size: 2.2rem; } 
+            
+            .prod-val {
+                font-size: 1rem;
+                font-weight: bold;
+                color: var(--primary);
+                margin-top: 4px;
+            }
+            
+            input, select {
+                font-size: 1rem;
+                padding: 12px 8px;
+            }
+            
+            .res-label { font-size: 0.95rem; }
+            .res-val { font-size: 1.15rem; }
+        }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <div class="lang-switcher-container">
-            <button id="scrollToResultBtn" class="lang-btn" title="結果へ移動" data-translate-key="scrollToResultTitle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flag-icon" style="padding: 4px; box-sizing: border-box; width: 32px; height: 32px; color: var(--text-color);">
-                    <path d="M12 5v14M19 12l-7 7-7-7"/>
-                </svg>
-            </button>
-            <button id="lang-ja" class="lang-btn">
-                <img src="https://flagcdn.com/w40/jp.png" alt="日本語" class="flag-icon">
-            </button>
-            <button id="lang-en" class="lang-btn">
-                <img src="https://flagcdn.com/w40/us.png" alt="English" class="flag-icon">
-            </button>
+
+<div class="container">
+    <header>
+        <h1>
+            <span data-t="title">コーヒー生産計算機</span>
+            <span class="subtitle">LastWar: Survival Season 5</span>
+        </h1>
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="setLang('ja')"><img src="https://flagcdn.com/w40/jp.png" class="flag-icon"></button>
+            <button class="lang-btn" onclick="setLang('en')"><img src="https://flagcdn.com/w40/us.png" class="flag-icon"></button>
         </div>
+    </header>
 
-        <h2>
-            <span data-translate-key="mainTitle">石英生産量計算機</span>
-            <span class="game-subtitle">LastWar:Survival (season5)</span>
-            <span class="version-display" data-translate-key="versionDisplay">v1.18（最終更新: 2025/06/24）</span>
-        </h2>
-
-        <section class="main-inputs-grid">
-            <div class="quartz-workshop-inputs">
-                <div>
-                    <label for="workshopILevel" data-translate-key="workshopI">石英工房 Ⅰ:</label>
-                    <select id="workshopILevel"></select>
-                    <div id="workshopILevelError" class="error-message"></div>
-                </div>
-                <div>
-                    <label for="workshopIILevel" data-translate-key="workshopII">石英工房 Ⅱ:</label>
-                    <select id="workshopIILevel"></select>
-                    <div id="workshopIILevelError" class="error-message"></div>
-                </div>
-                <div>
-                    <label for="workshopIIILevel" data-translate-key="workshopIII">石英工房 Ⅲ:</label>
-                    <select id="workshopIIILevel"></select>
-                    <div id="workshopIIILevelError" class="error-message"></div>
-                </div>
-                <div>
-                    <label for="workshopIVLevel" data-translate-key="workshopIV">石英工房 Ⅳ:</label>
-                    <select id="workshopIVLevel"></select>
-                    <div id="workshopIVLevelError" class="error-message"></div>
-                </div>
+    <div class="card">
+        <h2 data-t="h_factory">生産施設設定</h2>
+        <div class="grid-4" id="factory-container">
             </div>
-
-            <div class="weekly-delivery-input">
-                <label for="weeklyDeliveryLevel" data-translate-key="weeklyDelivery">週間配達:</label>
-                <select id="weeklyDeliveryLevel"></select>
-                <div id="weeklyDeliveryLevelError" class="error-message"></div>
-            </div>
-        </section>
-
-        <section class="workshop-production-display">
-            <div class="production-display-header">
-                <span data-translate-key="workshopName">工房名</span>
-                <span>/1h</span>
-                <span>/24h</span>
-            </div>
-            
-            <div class="collapsible-header" id="individualProductionHeader">
-                <span data-translate-key="individualProductionTitle">個別生産量詳細</span>
-                <span class="arrow">▼</span>
-            </div>
-
-            <div class="collapsible-content expanded" id="individualProductionContent">
-                <p>
-                    <span class="workshop-name-level">
-                        <span data-translate-key="workshopI">石英工房Ⅰ</span>
-                        <span class="level-display" id="workshopILevelDisplay">Lv.0</span>
-                    </span>
-                    <span class="hourly-display" id="workshopIProduction"></span>
-                    <span class="daily-display" id="workshopIProductionDaily"></span>
-                </p>
-                <p>
-                    <span class="workshop-name-level">
-                        <span data-translate-key="workshopII">石英工房Ⅱ</span>
-                        <span class="level-display" id="workshopIILevelDisplay">Lv.0</span>
-                    </span>
-                    <span class="hourly-display" id="workshopIIProduction"></span>
-                    <span class="daily-display" id="workshopIIProductionDaily"></span>
-                </p>
-                <p>
-                    <span class="workshop-name-level">
-                        <span data-translate-key="workshopIII">石英工房Ⅲ</span>
-                        <span class="level-display" id="workshopIIILevelDisplay">Lv.0</span>
-                    </span>
-                    <span class="hourly-display" id="workshopIIIProduction"></span>
-                    <span class="daily-display" id="workshopIIIProductionDaily"></span>
-                </p>
-                <p>
-                    <span class="workshop-name-level">
-                        <span data-translate-key="workshopIV">石英工房Ⅳ</span>
-                        <span class="level-display" id="workshopIVLevelDisplay">Lv.0</span>
-                    </span>
-                    <span class="hourly-display" id="workshopIVProduction"></span>
-                    <span class="daily-display" id="workshopIVProductionDaily"></span>
-                </p>
-                <p>
-                    <span class="workshop-name-level">
-                        <span data-translate-key="weeklyDelivery">週間配達</span>
-                        <span class="level-display" id="weeklyDeliveryLevelDisplay">Lv.0</span>
-                    </span>
-                    <span class="hourly-display" id="weeklyDeliveryHourly"></span>
-                    <span class="daily-display" id="weeklyDeliveryDaily"></span>
-                </p>
-            </div>
-
-            <p class="total-production-row"><span data-translate-key="totalProduction">総生産量:</span> <span class="hourly-display" id="totalHourlyProduction"></span> <span class="daily-display" id="totalDailyProduction"></span></p>
-        </section>
-
-        <section class="calculation-inputs">
-            <label for="quartzAmount" data-translate-key="currentQuartz">現在のコーヒー保有量:</label>
-            <input type="text" id="quartzAmount" value="0">
-            <span id="quartzAmountKSuffix" class="k-m-notation"></span>
-            <div id="quartzAmountError" class="error-message"></div>
-
-            <label for="currentLabLevel" data-translate-key="currentLabLevel">現在のカフェイン研究所Lv:</label>
-            <select id="currentLabLevel"></select>
-            <div id="currentLabLevelError" class="error-message"></div>
-
-            <label for="targetLevel" data-translate-key="targetLabLevel">目標のカフェイン研究所Lv:</label>
-            <select id="targetLevel"></select>
-            <div id="targetLevelError" class="error-message"></div>
-
-            <label for="reductionRate" data-translate-key="reductionRate">資源消費減少率（%）:</label>
-            <select id="reductionRate"></select>
-            <div id="reductionRateError" class="error-message"></div>
-
-            <label for="nowTime" data-translate-key="currentTime">現在時刻（自動取得）:</label>
-            <div class="time-input-container">
-                <input type="time" id="nowTime" readonly>
-                <button type="button" id="updateTimeBtn" class="time-update-btn" data-translate-key="updateTimeBtnTitle" title="現在時刻に更新">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                </button>
-            </div>
-            <div id="nowTimeError" class="error-message"></div>
-        </section>
-
-        <div class="button-group">
-            <button onclick="calculateQuartz(true)" data-translate-key="calculateBtn">計算</button>
-            <button id="saveButton" onclick="saveInputs()" data-translate-key="saveBtn">現在の値を保存</button>
-            <button id="resetButton" onclick="resetInputs()" data-translate-key="resetBtn">リセット</button>
+        <hr style="border: 0; border-top: 1px dashed #ddd; margin: 15px 0;">
+        <div class="form-group">
+            <label data-t="weekly">週間配達</label>
+            <select id="weekly-lv" onchange="updatePreview()"></select>
+            <div class="prod-val" id="weekly-val">0/h</div>
         </div>
-
-        <div id="output"></div>
+        
+        <div style="background: #f1f8e9; padding: 10px; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: bold; color: var(--primary);" data-t="total_prod">総生産量:</span>
+            <span style="font-weight: bold; font-size: 1.1rem;" id="total-preview">0/h</span>
+        </div>
     </div>
 
-    <script>
-        // ▼▼▼ [JS 修正] 翻訳キーの変更 ▼▼▼
-        const translations = {
-            ja: {
-                // ラベルとタイトル
-                languageLabel: "言語:",
-                mainTitle: "コーヒー生産計算機",
-                versionDisplay: "v1.04（最終更新: 2025/11/17）",
-                workshopI: "工場Ⅰ:",
-                workshopII: "工場Ⅱ:",
-                workshopIII: "工場Ⅲ:",
-                workshopIV: "工場Ⅳ:",
-                weeklyDelivery: "週間配達:",
-                workshopName: "工場名",
-                individualProductionTitle: "個別生産量詳細",
-                totalProduction: "総生産量:",
-                currentQuartz: "現在のコーヒー保有量:",
-                currentLabLevel: "現在のカフェイン研究所Lv:",
-                targetLabLevel: "目標のカフェイン研究所Lv:",
-                reductionRate: "資源消費減少率（%）:",
-                currentTime: "現在時刻（自動取得）:",
-                scrollToResultTitle: "結果へ移動",
-                updateTimeBtnTitle: "現在時刻に更新",
-                // ボタン
-                calculateBtn: "計算",
-                saveBtn: "現在の値を保存",
-                resetBtn: "リセット",
-                scrollTopBtn: "ページ上部へ", // [新規追加]
-                // セレクトボックスの初期値
-                notBuilt: "未建造",
-                // 計算結果
-                outputTarget: "目標:",
-                outputVirusResistance: "ウイルス耐性:",
-                outputDailyProduction: "1日あたり総生産量:",
-                outputTotalNeeded: "合計必要量:",
-                outputActualNeeded: "実質必要量:",
-                outputReductionAmount: "減少分:",
-                outputShortage: "不足数:（合計必要量－保有量）",
-                outputTimeToComplete: "達成までの時間:",
-                outputAlreadyReached: "既に保有量が目標に達しています。",
-                outputArrivalPrefix: "約",
-                outputArrivalSuffix: "頃 到達",
-                outputHours: "時間",
-                outputMinutes: "分",
-                // エラーメッセージ
-                errorTargetLevel: "目標Lvは現在のLvより高く設定してください。",
-                errorInputCheck: "入力値を確認してください。",
-                errorZeroProduction: "合計生産量が0です。",
-                errorZeroProductionDetail: "合計生産量が0です。工場か週間配達のレベルを上げてください。",
-                // アラート
-                alertSaved: "入力値を保存しました！",
-                alertSaveFailed: "入力値の保存に失敗しました。",
-                alertLoaded: "保存された入力値を読み込みました！",
-                confirmReset: "全ての入力値と保存データをリセットしますか？",
-                alertReset: "リセットしました！",
-                // (通知関連のキーは削除)
-            },
-            en: {
-                // Labels and Titles
-                languageLabel: "Language:",
-                mainTitle: "Coffee Production Calculator",
-                versionDisplay: "v1.04 (Last updated: 2025/11/17)",
-                workshopI: "Coffee FactoryⅠ",
-                workshopII: "Coffee FactoryⅡ",
-                workshopIII: "Coffee FactoryⅢ",
-                workshopIV: "Coffee FactoryⅣ",
-                weeklyDelivery: "Weekly Delivery:",
-                workshopName: "Workshop",
-                individualProductionTitle: "Individual Production Details",
-                totalProduction: "Total Production:",
-                currentQuartz: "Current Coffee Amount:",
-                currentLabLevel: "Current Caffein Institute Lvl:",
-                targetLabLevel: "Target Caffeine Institute Lvl:",
-                reductionRate: "Resource Consumption Reduction (%):",
-                currentTime: "Current Time (Auto):",
-                scrollToResultTitle: "Scroll to Result",
-                updateTimeBtnTitle: "Update to Current Time",
-                // Buttons
-                calculateBtn: "Calculate",
-                saveBtn: "Save Current Values",
-                resetBtn: "Reset",
-                scrollTopBtn: "Scroll to Top", // [New]
-                // Select Box Initial Value
-                notBuilt: "Not Built",
-                // Calculation Results
-                outputTarget: "Target:",
-                outputVirusResistance: "Virus Resistance:",
-                outputDailyProduction: "Total Production per Day:",
-                outputTotalNeeded: "Total Amount Needed:",
-                outputActualNeeded: "Actual Amount Needed:",
-                outputReductionAmount: "Reduction:",
-                outputShortage: "Shortage: (Total Needed - Current)",
-                outputTimeToComplete: "Time to Completion:",
-                outputAlreadyReached: "The current amount has already reached the target.",
-                outputArrivalPrefix: "Approx.",
-                outputArrivalSuffix: "Arrival",
-                outputHours: "h",
-                outputMinutes: "min",
-                // Error Messages
-                errorTargetLevel: "Target level must be higher than the current level.",
-                errorInputCheck: "Please check your input values.",
-                errorZeroProduction: "Total production is zero.",
-                errorZeroProductionDetail: "Total production is zero. Please level up a Quartz Workshop or Weekly Delivery.",
-                // Alerts
-                alertSaved: "Input values have been saved!",
-                alertSaveFailed: "Failed to save input values.",
-                alertLoaded: "Loaded saved input values!",
-                confirmReset: "Are you sure you want to reset all input values and saved data?",
-                alertReset: "Reset complete!",
-                // (Notification keys removed)
-            }
-        };
-        // ▲▲▲ [JS 修正] 翻訳キーの変更 ここまで ▲▲▲
+    <div class="card">
+        <h2 data-t="h_lab">研究所 & 目標</h2>
+        <div class="grid-2">
+            <div class="form-group">
+                <label data-t="current_lab">現在研究所Lv</label>
+                <select id="lab-current"></select>
+            </div>
+            <div class="form-group">
+                <label data-t="target_lab">目標研究所Lv</label>
+                <select id="lab-target"></select>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label data-t="stock">現在の保有量</label>
+                <input type="text" id="stock" value="0" placeholder="0" onblur="formatStock(this)" onfocus="unformatStock(this)">
+            </div>
+            <div class="form-group">
+                <label data-t="reduction">消費減少率 (%)</label>
+                <select id="reduction"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label data-t="time">現在時刻</label>
+            <div style="display: flex; gap: 5px;">
+                <input type="time" id="now-time">
+                <button onclick="setNowTime()" style="width: 50px; background:var(--secondary); color:white; border:none; border-radius:5px;">↻</button>
+            </div>
+        </div>
+    </div>
 
-        let currentLang = 'ja';
-        // (通知タイマーの変数は削除)
+    <div class="btn-group">
+        <button class="btn btn-calc" onclick="calculate()" data-t="btn_calc">計算する</button>
+        <button class="btn btn-save" onclick="saveData()" data-t="btn_save">保存</button>
+        <button class="btn btn-reset" onclick="resetData()" data-t="btn_reset">リセット</button>
+    </div>
 
-        const langBtnJa = document.getElementById('lang-ja');
-        const langBtnEn = document.getElementById('lang-en');
-
-        function updateLangButtons(lang) {
-            if (lang === 'ja') {
-                langBtnJa.classList.add('active');
-                langBtnEn.classList.remove('active');
-            } else {
-                langBtnEn.classList.add('active');
-                langBtnJa.classList.remove('active');
-            }
-        }
+    <div class="card" id="result-area">
+        <h2 data-t="h_result">計算結果</h2>
         
-        function setLanguage(lang) {
-            if (!translations[lang]) return;
-            currentLang = lang;
-            document.documentElement.lang = lang; 
+        <div class="result-row">
+            <span class="res-label" data-t="res_daily">1日あたりの生産量</span>
+            <span class="res-val" id="out-daily">0</span>
+        </div>
 
-            document.querySelectorAll('[data-translate-key]').forEach(element => {
-                const key = element.getAttribute('data-translate-key');
-                if (translations[lang][key]) {
-                    if (element.hasAttribute('title')) {
-                        element.setAttribute('title', translations[lang][key]);
-                    } 
-                    else if(element.parentElement.tagName === 'H2') {
-                        element.textContent = translations[lang][key];
-                    } else {
-                        if (element.id === 'updateTimeBtn') {
-                             element.setAttribute('title', translations[lang][key]);
-                        }
-                        else {
-                            const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '');
-                            if(textNode) {
-                               textNode.textContent = translations[lang][key];
-                            } else if (element.tagName === 'BUTTON' || element.tagName === 'SPAN' || element.tagName === 'LABEL') {
-                               let hasChildElements = false;
-                               for (let i = 0; i < element.childNodes.length; i++) {
-                                   if (element.childNodes[i].nodeType === 1) { // 1 == Element node
-                                       hasChildElements = true;
-                                       break;
-                                   }
-                               }
-                               if (!hasChildElements) {
-                                   element.innerText = translations[lang][key];
-                               }
-                            } else {
-                               element.innerText = translations[lang][key];
-                            }
-                        }
-                    }
-                }
-            });
-            
-            initializeSelects();
-            updateProductionDisplay();
-            updateLangButtons(lang);
+        <div class="result-row">
+            <span class="res-label" data-t="res_lab_lv">研究所Lv</span>
+            <span class="res-val" id="out-lab-lv">--</span>
+        </div>
 
-            if (outputDiv.innerHTML !== '') {
-                 calculateQuartz(false); 
-            }
-        }
-
-        const PRODUCTION_PER_LEVEL = 720;
-        const photoelectricLabQuartzNeeded = new Map([
-            [1, 700], [2, 11200], [3, 22400], [4, 44800], [5, 89600],
-            [6, 125400], [7, 150500], [8, 180600], [9, 216800], [10, 261000],
-            [11, 312100], [12, 403900], [13, 444300], [14, 488800], [15, 537600],
-            [16, 591400], [17, 650500], [18, 715600], [19, 787200], [20, 865900],
-            [21, 874500], [22, 883300], [23, 892100], [24, 901000], [25, 910000],
-            [26, 919100], [27, 928300], [28, 937600], [29, 947000], [30, 956500],
-            [31, 3229300], [32, 3326800], [33, 3425900], [34, 3526700], [35, 3629000],
-            [36, 0], [37, 0], [38, 0], [39, 0], [40, 0],
-            [41, 0], [42, 0], [43, 0], [44, 0], [45, 0],
-            [46, 0], [47, 0], [48, 0], [49, 0], [50, 0],
-            [51, 0], [52, 0], [53, 0], [54, 0], [55, 0],
-            [56, 0], [57, 0], [58, 0], [59, 0], [60, 0]
-        ]);
-
-        const virusResistance = new Map([
-            [1, 100], [2, 200], [3, 300], [4, 400], [5, 500],
-            [6, 750], [7, 1000], [8, 1250], [9, 1500], [10, 1750],
-            [11, 2000], [12, 2250], [13, 2500], [14, 2750], [15, 3000],
-            [16, 3250], [17, 3500], [18, 3750], [19, 4000], [20, 4250],
-            [21, 4500], [22, 4750], [23, 5000], [24, 5250], [25, 5500],
-            [26, 5750], [27, 6000], [28, 6250], [29, 6500], [30, 6750],
-            [31, 10500], [32, 11000], [33, 11500], [34, 12000], [35, 13000],
-            [36, 0], [37, 0], [38, 0], [39, 0], [40, 0],
-            [41, 0], [42, 0], [43, 0], [44, 0], [45, 0],
-            [46, 0], [47, 0], [48, 0], [49, 0], [50, 0],
-            [51, 0], [52, 0], [53, 0], [54, 0], [55, 0],
-            [56, 0], [57, 0], [58, 0], [59, 0], [60, 0]
-        ]);
-
-        // DOM要素の取得
-        const workshopILevelSelect = document.getElementById("workshopILevel");
-        const workshopIILevelSelect = document.getElementById("workshopIILevel");
-        const workshopIIILevelSelect = document.getElementById("workshopIIILevel");
-        const workshopIVLevelSelect = document.getElementById("workshopIVLevel");
-        const weeklyDeliveryLevelSelect = document.getElementById("weeklyDeliveryLevel");
-        const quartzAmountInput = document.getElementById("quartzAmount");
-        const quartzAmountKSuffixSpan = document.getElementById("quartzAmountKSuffix");
-        const currentLabLevelSelect = document.getElementById("currentLabLevel");
-        const targetLevelSelect = document.getElementById("targetLevel");
-        const reductionRateSelect = document.getElementById("reductionRate");
-        const nowTimeInput = document.getElementById("nowTime");
-        const outputDiv = document.getElementById("output");
-        const individualProductionHeader = document.getElementById("individualProductionHeader");
-        const individualProductionContent = document.getElementById("individualProductionContent");
-        const updateTimeBtn = document.getElementById("updateTimeBtn");
-
-        const workshopProductionSpans = {
-            I: { hourly: document.getElementById("workshopIProduction"), daily: document.getElementById("workshopIProductionDaily"), levelDisplay: document.getElementById("workshopILevelDisplay") },
-            II: { hourly: document.getElementById("workshopIIProduction"), daily: document.getElementById("workshopIIProductionDaily"), levelDisplay: document.getElementById("workshopIILevelDisplay") },
-            III: { hourly: document.getElementById("workshopIIIProduction"), daily: document.getElementById("workshopIIIProductionDaily"), levelDisplay: document.getElementById("workshopIIILevelDisplay") },
-            IV: { hourly: document.getElementById("workshopIVProduction"), daily: document.getElementById("workshopIVProductionDaily"), levelDisplay: document.getElementById("workshopIVLevelDisplay") },
-            weekly: { hourly: document.getElementById("weeklyDeliveryHourly"), daily: document.getElementById("weeklyDeliveryDaily"), levelDisplay: document.getElementById("weeklyDeliveryLevelDisplay") },
-            total: { hourly: document.getElementById("totalHourlyProduction"), daily: document.getElementById("totalDailyProduction") }
-        };
-
-        const errorElements = {
-            workshopILevel: document.getElementById("workshopILevelError"), workshopIILevel: document.getElementById("workshopIILevelError"),
-            workshopIIILevel: document.getElementById("workshopIIILevelError"), workshopIVLevel: document.getElementById("workshopIVLevelError"),
-            weeklyDeliveryLevel: document.getElementById("weeklyDeliveryLevelError"), quartzAmount: document.getElementById("quartzAmountError"),
-            currentLabLevel: document.getElementById("currentLabLevelError"), targetLevel: document.getElementById("targetLevelError"),
-            reductionRate: document.getElementById("reductionRateError"), nowTime: document.getElementById("nowTimeError")
-        };
-
-        function clearErrors() {
-            // (通知タイマーのクリア処理は削除)
-            Object.values(errorElements).forEach(el => {
-                if (el) {
-                    el.textContent = '';
-                    el.classList.remove('active');
-                }
-            });
-            document.querySelectorAll('select, input').forEach(input => input.classList.remove('input-error'));
-            outputDiv.innerHTML = '';
-        }
-
-        function showError(elementId, message) {
-            const errorDiv = errorElements[elementId];
-            const inputElement = document.getElementById(elementId);
-            if (errorDiv) {
-                errorDiv.textContent = message;
-                errorDiv.classList.add('active');
-            }
-            if (inputElement) inputElement.classList.add('input-error');
-        }
-
-        function formatNumber(num) {
-            if (typeof num !== 'number' || isNaN(num)) return 'N/A';
-            return Math.floor(num).toLocaleString();
-        }
-
-        function getKSuffixText(num) {
-            if (typeof num !== 'number' || isNaN(num) || num < 1000) return '';
-            const format = (val, suffix) => {
-                let str = val.toFixed(2);
-                if (str.endsWith('.00')) str = Math.floor(val).toString();
-                else if (str.endsWith('0')) str = str.slice(0, -1);
-                return `(${str}${suffix})`;
-            };
-            return num >= 1000000 ? format(num / 1000000, 'M') : format(num / 1000, 'K');
-        }
+        <div class="result-row">
+            <span class="res-label" data-t="res_virus">ウイルス耐性</span>
+            <span class="res-val" id="out-virus">0 → 0</span>
+        </div>
+        <div class="result-row">
+            <span class="res-label" data-t="res_cost">必要総コスト (割引後)</span>
+            <span class="res-val" id="out-cost">0</span>
+        </div>
+        <div class="result-row">
+            <span class="res-label" data-t="res_shortage">不足分</span>
+            <span class="res-val res-highlight" id="out-shortage">0</span>
+        </div>
         
-        function parseFormattedNumber(str) {
-            if (typeof str !== 'string') return 0;
-            return parseInt(str.replace(/,/g, '').trim(), 10) || 0;
+        <div class="arrival-box">
+            <span class="res-label" data-t="res_time" style="font-weight:bold; color:#555;">達成予想日時</span>
+            <span class="res-date" id="out-date">--/--</span>
+            <span class="res-time" id="out-time">--:--</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ============================================
+       DATA CONFIGURATION (Lv 1-60)
+       ============================================ */
+    const PROD_PER_LV = 720; // 生産量係数
+    const MAX_LV = 60;       // 最大レベル設定
+
+    // 研究所コスト (Lv1 - Lv31)
+    const LAB_COSTS = {
+        1: 700, 2: 11200, 3: 22400, 4: 44800, 5: 89600,
+        6: 125400, 7: 150500, 8: 180600, 9: 216800, 10: 261000,
+        11: 312100, 12: 403900, 13: 444300, 14: 488800, 15: 537600,
+        16: 591400, 17: 650500, 18: 715600, 19: 787200, 20: 865900,
+        21: 874500, 22: 883300, 23: 892100, 24: 901000, 25: 910000,
+        26: 919100, 27: 928300, 28: 937600, 29: 947000, 30: 956500,
+        31: 966000, 32: 975700, 33: 985500
+    };
+
+    // ウイルス耐性 (Lv1 - Lv31)
+    const VIRUS_RES = {
+        0: 0, 1: 100, 2: 200, 3: 300, 4: 400, 5: 500,
+        6: 750, 7: 1000, 8: 1250, 9: 1500, 10: 1750,
+        11: 2000, 12: 2250, 13: 2500, 14: 2750, 15: 3000,
+        16: 3250, 17: 3500, 18: 3750, 19: 4000, 20: 4250,
+        21: 4500, 22: 4750, 23: 5000, 24: 5250, 25: 5500,
+        26: 5750, 27: 6000, 28: 6250, 29: 6500, 30: 6750,
+        31: 7000, 32: 7250, 33: 7500
+    };
+
+    // Lv33以降 Lv60までは自動的に0で埋める
+    for (let i = 34; i <= MAX_LV; i++) {
+        LAB_COSTS[i] = 0;
+        VIRUS_RES[i] = 0;
+    }
+
+    // 翻訳データ
+    const LANG = {
+        ja: {
+            title: "コーヒー生産計算機",
+            h_factory: "生産施設設定",
+            weekly: "週間配達",
+            total_prod: "総生産量:",
+            h_lab: "研究所 & 目標",
+            current_lab: "現在研究所Lv",
+            target_lab: "目標研究所Lv",
+            stock: "現在の保有量",
+            reduction: "消費減少率 (%)",
+            time: "現在時刻",
+            btn_calc: "計算する",
+            btn_save: "保存",
+            btn_reset: "リセット",
+            h_result: "計算結果",
+            res_lab_lv: "研究所Lv",
+            res_daily: "1日あたりの生産量",
+            res_virus: "ウイルス耐性",
+            res_cost: "必要総コスト",
+            res_shortage: "不足分",
+            res_time: "達成予想日時",
+            factory_prefix: "工場",
+            not_built: "未建造",
+            msg_saved: "保存しました",
+            msg_reset: "リセットしました"
+        },
+        en: {
+            title: "Coffee Production Calc",
+            h_factory: "Factory Settings",
+            weekly: "Weekly Delivery",
+            total_prod: "Total Production:",
+            h_lab: "Lab & Target",
+            current_lab: "Current Lab Lv",
+            target_lab: "Target Lab Lv",
+            stock: "Current Stock",
+            reduction: "Resource Reduction (%)",
+            time: "Current Time",
+            btn_calc: "Calculate",
+            btn_save: "Save",
+            btn_reset: "Reset",
+            h_result: "Result",
+            res_lab_lv: "Lab Level",
+            res_daily: "Daily Production",
+            res_virus: "Virus Resistance",
+            res_cost: "Total Cost",
+            res_shortage: "Shortage",
+            res_time: "Est. Completion",
+            factory_prefix: "Factory",
+            not_built: "Not Built",
+            msg_saved: "Saved!",
+            msg_reset: "Reset!"
         }
+    };
 
-        function populateLevelSelect(selectElement, start, end, initialText = null) {
-            const currentValue = selectElement.value;
-            selectElement.innerHTML = '';
-            for (let i = start; i <= end; i++) {
-                const text = (i === 0 && initialText) ? initialText : `Lv ${i}`;
-                const option = new Option(text, i);
-                selectElement.add(option);
-            }
-            if (currentValue) {
-                selectElement.value = currentValue;
-            }
-        }
+    let curLang = 'ja';
 
-        function initializeSelects() {
-            const notBuiltText = translations[currentLang].notBuilt;
-            populateLevelSelect(workshopILevelSelect, 0, 35, notBuiltText);
-            populateLevelSelect(workshopIILevelSelect, 0, 35, notBuiltText);
-            populateLevelSelect(workshopIIILevelSelect, 0, 35, notBuiltText);
-            populateLevelSelect(workshopIVLevelSelect, 0, 35, notBuiltText);
-            populateLevelSelect(weeklyDeliveryLevelSelect, 0, 35, notBuiltText);
-            populateLevelSelect(currentLabLevelSelect, 0, Math.max(...photoelectricLabQuartzNeeded.keys()), notBuiltText);
-            populateLevelSelect(targetLevelSelect, 1, Math.max(...photoelectricLabQuartzNeeded.keys()));
-            
-            if (reductionRateSelect.options.length === 0) {
-                 for (let i = 0; i <= 15; i += 0.5) {
-                    reductionRateSelect.add(new Option(`${i.toFixed(1)}%`, i));
-                }
-            }
-        }
+    /* ============================================
+       LOGIC & UI
+       ============================================ */
+    
+    window.onload = () => {
+        initUI();
+        loadData();
+        setNowTime();
+    };
 
-        function setNowTime() {
-            const now = new Date();
-            nowTimeInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        }
-
-        function updateProductionDisplay() {
-            const levels = {
-                I: { level: parseInt(workshopILevelSelect.value) || 0, key: 'workshopI' },
-                II: { level: parseInt(workshopIILevelSelect.value) || 0, key: 'workshopII' },
-                III: { level: parseInt(workshopIIILevelSelect.value) || 0, key: 'workshopIII' },
-                IV: { level: parseInt(workshopIVLevelSelect.value) || 0, key: 'workshopIV' }
-            };
-            const weeklyLevel = parseInt(weeklyDeliveryLevelSelect.value) || 0;
-            let totalProduction = 0;
-            
-            const notBuiltText = translations[currentLang].notBuilt;
-
-            Object.entries(levels).forEach(([key, data]) => {
-                const hourly = data.level * PRODUCTION_PER_LEVEL;
-                const spanSet = workshopProductionSpans[key];
-                spanSet.hourly.innerHTML = `${formatNumber(hourly)}<span class="k-m-notation">${getKSuffixText(hourly)}</span>`;
-                spanSet.daily.innerHTML = `${formatNumber(hourly * 24)}<span class="k-m-notation">${getKSuffixText(hourly * 24)}</span>`;
-                spanSet.levelDisplay.textContent = data.level === 0 ? notBuiltText : `Lv.${data.level}`;
-                
-                const nameSpan = spanSet.levelDisplay.parentElement.querySelector(`[data-translate-key="${data.key}"]`);
-                if(nameSpan) nameSpan.textContent = translations[currentLang][data.key].replace(':', '');
-
-                totalProduction += hourly;
-            });
-
-            const weeklyHourly = weeklyLevel * PRODUCTION_PER_LEVEL;
-            workshopProductionSpans.weekly.hourly.innerHTML = `${formatNumber(weeklyHourly)}<span class="k-m-notation">${getKSuffixText(weeklyHourly)}</span>`;
-            workshopProductionSpans.weekly.daily.innerHTML = `${formatNumber(weeklyHourly * 24)}<span class="k-m-notation">${getKSuffixText(weeklyHourly * 24)}</span>`;
-            workshopProductionSpans.weekly.levelDisplay.textContent = weeklyLevel === 0 ? notBuiltText : `Lv.${weeklyLevel}`;
-            
-            const weeklyNameSpan = workshopProductionSpans.weekly.levelDisplay.parentElement.querySelector(`[data-translate-key="weeklyDelivery"]`);
-            if(weeklyNameSpan) weeklyNameSpan.textContent = translations[currentLang]['weeklyDelivery'].replace(':', '');
-
-            totalProduction += weeklyHourly;
-
-            workshopProductionSpans.total.hourly.innerHTML = `${formatNumber(totalProduction)}<span class="k-m-notation">${getKSuffixText(totalProduction)}</span>`;
-            workshopProductionSpans.total.daily.innerHTML = `${formatNumber(totalProduction * 24)}<span class="k-m-notation">${getKSuffixText(totalProduction * 24)}</span>`;
-        }
-        
-        // (通知関連の関数は削除)
-
-        function calculateQuartz(shouldScroll = false) {
-            clearErrors();
-            const T = translations[currentLang];
-            
-            const quartzAmount = parseFormattedNumber(quartzAmountInput.value);
-            const currentLabLevel = parseInt(currentLabLevelSelect.value);
-            const targetLevel = parseInt(targetLevelSelect.value);
-            const currentVirusResistance = virusResistance.get(currentLabLevel) || 0;
-            const targetVirusResistance = virusResistance.get(targetLevel) || 0;
-
-            const reductionRate = parseFloat(reductionRateSelect.value);
-            const totalProductionPerHour = (parseInt(workshopILevelSelect.value) + parseInt(workshopIILevelSelect.value) + parseInt(workshopIIILevelSelect.value) + parseInt(workshopIVLevelSelect.value) + parseInt(weeklyDeliveryLevelSelect.value)) * PRODUCTION_PER_LEVEL;
-
-            if (currentLabLevel >= targetLevel) {
-                showError('targetLevel', T.errorTargetLevel);
-                outputDiv.innerHTML = `<p style='color: var(--tertiary-color); font-weight: bold;'>${T.errorInputCheck}</p>`;
-                return;
-            }
-            if (totalProductionPerHour <= 0) {
-                showError('workshopILevel', T.errorZeroProductionDetail);
-                outputDiv.innerHTML = `<p style='color: var(--tertiary-color); font-weight: bold;'>${T.errorZeroProduction}</p>`;
-                return;
-            }
-
-            let totalQuartzNeededForRange = 0;
-            for (let lv = currentLabLevel + 1; lv <= targetLevel; lv++) {
-                totalQuartzNeededForRange += photoelectricLabQuartzNeeded.get(lv) || 0;
-            }
-
-            const requiredQuartzAfterReduction = Math.ceil(totalQuartzNeededForRange * (1 - reductionRate / 100));
-            const reductionAmount = totalQuartzNeededForRange - requiredQuartzAfterReduction;
-            const neededQuartz = Math.max(0, requiredQuartzAfterReduction - quartzAmount);
-            
-            let timeResultHtml = `<span class='info'>${T.outputAlreadyReached}</span>`;
-            if (neededQuartz > 0) {
-                const minutesNeeded = (neededQuartz / totalProductionPerHour) * 60;
-                const millisecondsNeeded = minutesNeeded * 60 * 1000; // ミリ秒
-                
-                const now = new Date();
-                const [hour, minute] = nowTimeInput.value.split(":").map(Number);
-                now.setHours(hour, minute, 0, 0);
-                const endTime = new Date(now.getTime() + millisecondsNeeded);
-                
-                const timeString = `${Math.floor(minutesNeeded/60)}${T.outputHours} ${Math.floor(minutesNeeded % 60)}${T.outputMinutes}`;
-                const arrivalString = `${endTime.getMonth() + 1}/${endTime.getDate()} ${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`;
-                
-                timeResultHtml = `${T.outputArrivalPrefix} <span class="time">${timeString}</span>
-                                  <br><span class="arrival-time-emphasis">${arrivalString} ${T.outputArrivalSuffix}</span>`;
-                                  
-                // (通知スケジュールの呼び出しは削除)
-            }
-
-            const notBuiltText = T.notBuilt;
-            
-            // ▼▼▼ [JS 修正] innerHTMLの末尾に「上へ移動」ボタンを追加 ▼▼▼
-            outputDiv.innerHTML = `
-                <p><span>${T.outputTarget}</span> <span class="info">${currentLabLevel === 0 ? notBuiltText : `Lv.${currentLabLevel}`} → Lv.${targetLevel}</span></p>
-                <p><span>${T.outputVirusResistance}</span> <span class="info">${currentLabLevel === 0 ? formatNumber(currentVirusResistance) : `  ${formatNumber(currentVirusResistance)}`} →  ${formatNumber(targetVirusResistance)}</span></p>        
-                <p><span>${T.outputDailyProduction}</span> <span class="production">${formatNumber(totalProductionPerHour*24)} ${getKSuffixText(totalProductionPerHour*24)}</span></p>
-                <p><span>${T.outputTotalNeeded}</span> <span class="target">${formatNumber(totalQuartzNeededForRange)} ${getKSuffixText(totalQuartzNeededForRange)}</span></p>
-                <p class="adjusted-margin-top"><span>${T.outputActualNeeded}</span> <span class="target">${formatNumber(requiredQuartzAfterReduction)} ${getKSuffixText(requiredQuartzAfterReduction)}<span class="reduction-amount">(${T.outputReductionAmount} ${formatNumber(reductionAmount)})</span></span></p>
-                <p><span>${T.outputShortage}</span> <span class="needed">${formatNumber(neededQuartz)} ${getKSuffixText(neededQuartz)}</span></p>
-                <p><span>${T.outputTimeToComplete}</span> <span>${timeResultHtml}</span></p>
-                
-                <p style="border-bottom: none; padding-bottom: 0; margin-top: 1.5rem; display: flex; justify-content: flex-end;">
-                    <button type="button" id="scrollTopBtn" class="scroll-top-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-                        <span data-translate-key="scrollTopBtn">${T.scrollTopBtn}</span>
-                    </button>
-                </p>
+    function initUI() {
+        const container = document.getElementById('factory-container');
+        for (let i = 1; i <= 4; i++) {
+            const div = document.createElement('div');
+            div.className = 'form-group';
+            div.innerHTML = `
+                <label><span data-t="factory_prefix">工房</span> ${convertToRoman(i)}</label>
+                <select id="ws${i}-lv" onchange="updatePreview()"></select>
+                <div class="prod-val" id="ws${i}-val">0/h</div>
             `;
-            // ▲▲▲ [JS 修正] ここまで ▲▲▲
+            container.appendChild(div);
+            populateSelect(`ws${i}-lv`, 0, 35); 
+        }
+        populateSelect('weekly-lv', 0, 35);
+        populateSelect('lab-current', 0, MAX_LV);
+        populateSelect('lab-target', 1, MAX_LV);
 
-            if (shouldScroll) {
-                outputDiv.scrollIntoView({ behavior: 'smooth' });
+        const redSel = document.getElementById('reduction');
+        for (let i = 0; i <= 15; i+=0.5) {
+            redSel.add(new Option(i.toFixed(1) + '%', i));
+        }
+
+        setLang(localStorage.getItem('s5_lang') || 'ja');
+    }
+
+    // --- K/M入力対応ロジック ---
+    function parseStock(val) {
+        if (!val) return 0;
+        let str = String(val).toLowerCase().replace(/,/g, '').trim();
+        let multi = 1;
+        
+        if (str.endsWith('k')) {
+            multi = 1000;
+            str = str.slice(0, -1);
+        } else if (str.endsWith('m')) {
+            multi = 1000000;
+            str = str.slice(0, -1);
+        }
+        
+        const num = parseFloat(str);
+        return isNaN(num) ? 0 : Math.floor(num * multi);
+    }
+
+    function formatStock(input) {
+        const num = parseStock(input.value);
+        input.value = num.toLocaleString();
+    }
+
+    function unformatStock(input) {
+        const val = parseStock(input.value);
+        if (val === 0) {
+            input.value = '';
+        } else {
+            input.value = val;
+        }
+    }
+
+    function formatKM(num) {
+        if (num >= 1000000) {
+            const mVal = (num / 1000000).toFixed(2).replace(/\.00$/, '');
+            return `<span class="km-suffix">(${mVal}M)</span>`;
+        }
+        if (num >= 1000) {
+            const kVal = (num / 1000).toFixed(1).replace(/\.0$/, '');
+            return `<span class="km-suffix">(${kVal}K)</span>`;
+        }
+        return '';
+    }
+
+    function calculate() {
+        let totalH = 0;
+        for (let i = 1; i <= 4; i++) {
+            const lv = parseInt(document.getElementById(`ws${i}-lv`).value) || 0;
+            totalH += lv * PROD_PER_LV;
+        }
+        const wLv = parseInt(document.getElementById(`weekly-lv`).value) || 0;
+        totalH += wLv * PROD_PER_LV;
+
+        if (totalH === 0) {
+            alert("生産量が0です。施設レベルを設定してください。");
+            return;
+        }
+
+        const curLab = parseInt(document.getElementById('lab-current').value);
+        const tgtLab = parseInt(document.getElementById('lab-target').value);
+        
+        if (curLab >= tgtLab) {
+            alert("目標Lvは現在Lvより大きくしてください。");
+            return;
+        }
+
+        let rawCost = 0;
+        for (let i = curLab + 1; i <= tgtLab; i++) {
+            if (LAB_COSTS[i] !== undefined) rawCost += LAB_COSTS[i];
+        }
+
+        const rate = parseFloat(document.getElementById('reduction').value) || 0;
+        const realCost = Math.ceil(rawCost * (1 - rate/100));
+        const stock = parseStock(document.getElementById('stock').value);
+        
+        const shortage = Math.max(0, realCost - stock);
+
+        const timeElem = document.getElementById('out-time');
+        const dateElem = document.getElementById('out-date');
+        
+        if (shortage <= 0) {
+            timeElem.innerText = "達成済み";
+            timeElem.style.color = "green";
+            dateElem.innerText = "";
+        } else {
+            const hoursNeeded = shortage / totalH;
+            const nowVal = document.getElementById('now-time').value;
+            const now = new Date();
+            if (nowVal) {
+                const [h, m] = nowVal.split(':');
+                now.setHours(h, m);
             }
+            now.setMinutes(now.getMinutes() + (hoursNeeded * 60));
 
-            const adjustedMarginP = document.querySelector('#output p.adjusted-margin-top');
-            if (adjustedMarginP) {
-                adjustedMarginP.style.marginTop = '0';
-                adjustedMarginP.style.paddingTop = '0';
+            dateElem.innerText = `${now.getMonth()+1}月${now.getDate()}日`;
+            timeElem.innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            timeElem.style.color = "#C2185B";
+        }
+
+        // --- 結果表示の更新 ---
+        
+        // 研究所Lv表示
+        const curLabText = curLab === 0 ? LANG[curLang].not_built : `Lv.${curLab}`;
+        const tgtLabText = `Lv.${tgtLab}`;
+        document.getElementById('out-lab-lv').innerText = `${curLabText} → ${tgtLabText}`;
+
+        document.getElementById('out-daily').innerHTML = fmt(totalH * 24) + formatKM(totalH * 24);
+        
+        const virusFrom = VIRUS_RES[curLab] !== undefined ? fmt(VIRUS_RES[curLab]) : '??';
+        const virusTo = VIRUS_RES[tgtLab] !== undefined ? fmt(VIRUS_RES[tgtLab]) : '??';
+        document.getElementById('out-virus').innerText = `${virusFrom} → ${virusTo}`;
+        
+        document.getElementById('out-cost').innerHTML = fmt(realCost) + formatKM(realCost);
+        document.getElementById('out-shortage').innerHTML = fmt(shortage) + formatKM(shortage);
+
+        document.getElementById('result-area').classList.add('show');
+        document.getElementById('result-area').scrollIntoView({behavior:'smooth'});
+    }
+
+    function updatePreview() {
+        let total = 0;
+        for(let i=1; i<=4; i++) {
+            const lv = parseInt(document.getElementById(`ws${i}-lv`).value)||0;
+            const val = lv * PROD_PER_LV;
+            document.getElementById(`ws${i}-val`).innerHTML = fmt(val) + formatKM(val) + '/h';
+            total += val;
+        }
+        const wLv = parseInt(document.getElementById('weekly-lv').value)||0;
+        const wVal = wLv * PROD_PER_LV;
+        document.getElementById('weekly-val').innerHTML = fmt(wVal) + formatKM(wVal) + '/h';
+        total += wVal;
+
+        document.getElementById('total-preview').innerHTML = fmt(total) + formatKM(total) + '/h';
+    }
+
+    function populateSelect(id, min, max) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = ''; 
+        
+        const notBuiltText = LANG[curLang].not_built;
+        sel.add(new Option(notBuiltText, 0));
+        
+        for(let i=Math.max(1, min); i<=max; i++) {
+            sel.add(new Option(`Lv.${i}`, i));
+        }
+    }
+
+    function setNowTime() {
+        const d = new Date();
+        document.getElementById('now-time').value = 
+            ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+    }
+
+    function fmt(num) { return num.toLocaleString(); }
+
+    function convertToRoman(num) {
+        const roman = {1:'Ⅰ', 2:'Ⅱ', 3:'Ⅲ', 4:'Ⅳ'};
+        return roman[num] || num;
+    }
+
+    function saveData() {
+        const data = {
+            ws: [],
+            weekly: document.getElementById('weekly-lv').value,
+            labC: document.getElementById('lab-current').value,
+            labT: document.getElementById('lab-target').value,
+            stock: document.getElementById('stock').value,
+            red: document.getElementById('reduction').value
+        };
+        for(let i=1; i<=4; i++) data.ws.push(document.getElementById(`ws${i}-lv`).value);
+        
+        localStorage.setItem('s5_calc_data_v9', JSON.stringify(data));
+        alert(LANG[curLang].msg_saved);
+    }
+
+    function loadData() {
+        const raw = localStorage.getItem('s5_calc_data_v9');
+        if(raw) {
+            const data = JSON.parse(raw);
+            if(data.ws) {
+                data.ws.forEach((lv, idx) => document.getElementById(`ws${idx+1}-lv`).value = lv);
             }
-        }
-
-        function saveInputs() {
-            const inputs = {
-                workshopILevel: workshopILevelSelect.value, workshopIILevel: workshopIILevelSelect.value,
-                workshopIIILevel: workshopIIILevelSelect.value, workshopIVLevel: workshopIVLevelSelect.value,
-                weeklyDeliveryLevel: weeklyDeliveryLevelSelect.value, quartzAmount: parseFormattedNumber(quartzAmountInput.value).toString(),
-                currentLabLevel: currentLabLevelSelect.value, targetLevel: targetLevelSelect.value,
-                reductionRate: reductionRateSelect.value,
-            };
-            try {
-                localStorage.setItem('quartzCalculatorInputs', JSON.stringify(inputs));
-                localStorage.setItem('individualProductionExpanded', individualProductionContent.classList.contains('expanded'));
-                alert(translations[currentLang].alertSaved);
-            } catch (e) {
-                alert(translations[currentLang].alertSaveFailed);
-                console.error('Failed to save inputs:', e);
+            if(data.weekly) document.getElementById('weekly-lv').value = data.weekly;
+            if(data.labC) document.getElementById('lab-current').value = data.labC;
+            if(data.labT) document.getElementById('lab-target').value = data.labT;
+            if(data.stock) {
+                const input = document.getElementById('stock');
+                input.value = data.stock;
+                formatStock(input); 
             }
+            if(data.red) document.getElementById('reduction').value = data.red;
+            updatePreview();
         }
+    }
 
-        function loadCollapsibleState() {
-            try {
-                const isExpanded = localStorage.getItem('individualProductionExpanded');
-                if (isExpanded === 'false') {
-                    individualProductionContent.classList.remove('expanded');
-                    individualProductionHeader.classList.add('collapsed');
-                } else {
-                    individualProductionContent.classList.add('expanded');
-                    individualProductionHeader.classList.remove('collapsed');
-                }
-            } catch (e) {
-                console.error('Failed to load collapsible state:', e);
-                individualProductionContent.classList.add('expanded');
-                individualProductionHeader.classList.remove('collapsed');
-            }
+    function resetData() {
+        if(confirm("リセットしますか？")) {
+            localStorage.removeItem('s5_calc_data_v9');
+            location.reload();
         }
+    }
 
-        function loadInputs() {
-            try {
-                const savedInputs = localStorage.getItem('quartzCalculatorInputs');
-                if (savedInputs) {
-                    const inputs = JSON.parse(savedInputs);
-                    Object.entries(inputs).forEach(([key, value]) => {
-                        const el = document.getElementById(key + 'Level') || document.getElementById(key);
-                        if (el) el.value = value;
-                    });
-                    const initialQuartzAmount = parseInt(inputs.quartzAmount) || 0;
-                    quartzAmountInput.value = formatNumber(initialQuartzAmount);
-                    quartzAmountKSuffixSpan.textContent = getKSuffixText(initialQuartzAmount);
-                    alert(translations[currentLang].alertLoaded);
-                }
-            } catch (e) { console.error('Failed to load inputs:', e); }
-            setNowTime();
-        }
-
-        function resetInputs() {
-            if (!confirm(translations[currentLang].confirmReset)) return;
-            const formElements = [
-                workshopILevelSelect, workshopIILevelSelect, workshopIIILevelSelect, workshopIVLevelSelect,
-                weeklyDeliveryLevelSelect, currentLabLevelSelect, reductionRateSelect
-            ];
-            formElements.forEach(el => el.value = '0');
-            targetLevelSelect.value = '1';
-            quartzAmountInput.value = '0';
-            quartzAmountKSuffixSpan.textContent = '';
-            individualProductionContent.classList.add('expanded');
-            individualProductionHeader.classList.remove('collapsed');
-            setNowTime();
-            updateProductionDisplay();
-            clearErrors();
-            try {
-                localStorage.removeItem('quartzCalculatorInputs');
-                localStorage.removeItem('individualProductionExpanded');
-                alert(translations[currentLang].alertReset);
-            } catch (e) { console.error('Failed to remove saved inputs:', e); }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('calculatorLang') || 'ja';
-            setLanguage(savedLang);
-
-            loadInputs();
-            loadCollapsibleState();
-            updateProductionDisplay();
-
-            const scrollToResultBtn = document.getElementById('scrollToResultBtn');
-            const outputDivForScroll = document.getElementById('output');
-            
-            scrollToResultBtn.addEventListener('click', () => {
-                if (outputDivForScroll.innerHTML.trim() !== '') {
-                    outputDivForScroll.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    document.querySelector('[data-translate-key="calculateBtn"]').focus();
-                }
-            });
-
-            langBtnJa.addEventListener('click', () => {
-                setLanguage('ja');
-                try { localStorage.setItem('calculatorLang', 'ja'); } catch(e) { console.error("Could not save language setting"); }
-            });
-
-            langBtnEn.addEventListener('click', () => {
-                setLanguage('en');
-                try { localStorage.setItem('calculatorLang', 'en'); } catch(e) { console.error("Could not save language setting"); }
-            });
-            
-            updateTimeBtn.addEventListener('click', () => {
-                setNowTime();
-                if (outputDiv.innerHTML.trim() !== '') {
-                    calculateQuartz(false);
-                }
-            });
-
-            individualProductionHeader.addEventListener("click", () => {
-                individualProductionHeader.classList.toggle("collapsed");
-                individualProductionContent.classList.toggle("expanded");
-                try {
-                    localStorage.setItem('individualProductionExpanded', individualProductionContent.classList.contains('expanded'));
-                } catch(e) { console.error("Could not save collapsible state"); }
-            });
-
-            quartzAmountInput.addEventListener('focus', function() {
-                this.value = parseFormattedNumber(this.value) || '';
-                quartzAmountKSuffixSpan.textContent = '';
-            });
-
-            quartzAmountInput.addEventListener('blur', function() {
-                const value = parseFormattedNumber(this.value);
-                this.value = formatNumber(value);
-                quartzAmountKSuffixSpan.textContent = getKSuffixText(value);
-            });
-            
-            [workshopILevelSelect, workshopIILevelSelect, workshopIIILevelSelect, workshopIVLevelSelect, weeklyDeliveryLevelSelect]
-            .forEach(element => element.addEventListener("change", updateProductionDisplay));
-            
-            // ▼▼▼ [JS 修正] ページ上部へ移動ボタンのイベントリスナー（イベント委任） ▼▼▼
-            outputDiv.addEventListener('click', function(e) {
-                // クリックされた要素が #scrollTopBtn か、その子要素（SVGやSPAN）かを確認
-                const btn = e.target.closest('#scrollTopBtn');
-                if (btn) {
-                    // ページ（ウィンドウ）の最上部へスクロール
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            });
-            // ▲▲▲ [JS 修正] ここまで ▲▲▲
-            
-            // (通知許可のリクエストは削除)
+    function setLang(lang) {
+        curLang = lang;
+        localStorage.setItem('s5_lang', lang);
+        
+        document.querySelectorAll('[data-t]').forEach(el => {
+            const key = el.getAttribute('data-t');
+            if(LANG[lang][key]) el.innerText = LANG[lang][key];
         });
-    </script>
+
+        const currentVals = {};
+        document.querySelectorAll('select').forEach(s => currentVals[s.id] = s.value);
+        
+        populateSelect('weekly-lv', 0, 35);
+        populateSelect('lab-current', 0, MAX_LV);
+        populateSelect('lab-target', 1, MAX_LV);
+        for(let i=1; i<=4; i++) populateSelect(`ws${i}-lv`, 0, 35);
+        
+        Object.keys(currentVals).forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = currentVals[id];
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+    }
+</script>
 </body>
-
 </html>
-
-
-
-
-
-
-
