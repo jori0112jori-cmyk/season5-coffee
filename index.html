@@ -2,726 +2,439 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LastWar S5 コーヒー生産計算機 (Lv60対応)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LastWar S5 Coffee Calc</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* S5 テーマカラー */
-            --primary: #2E7D32;       /* 濃い緑 */
-            --secondary: #4CAF50;     /* 明るい緑 */
-            --accent: #FF7043;        /* オレンジアクセント */
-            --bg-body: #F1F8E9;       /* 薄い背景緑 */
-            --bg-card: #FFFFFF;
-            --text-main: #333333;
-            --text-sub: #666666;
-            --border: #C8E6C9;
-            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            /* コーヒーテーマ配色 */
+            --primary: #4E342E;       /* エスプレッソ（濃い茶色） */
+            --bg-body: #EFEBE9;       /* ラテ（薄いベージュ） */
+            --bg-card: #FFFFFF;       /* ホワイト */
+            --text: #3E2723;          /* 焦げ茶（文字色） */
+            --border: #D7CCC8;        /* モカ（薄い境界線） */
+            --accent: #BF360C;        /* コーヒーチェリー（熟した赤/濃いオレンジ） */
+            --btn-gray: #8D6E63;      /* マイルドな茶色 */
+            --shadow: 0 2px 8px rgba(62, 39, 35, 0.1); /* 影も茶色ベース */
         }
-
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* ヘッダーエリア */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start; /* 上揃えに変更 */
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-
-        h1 {
-            font-size: 1.4rem;
-            color: var(--primary);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            flex: 1; /* タイトルがスペースを埋める */
-        }
-        .subtitle { font-size: 0.8rem; color: var(--text-sub); font-weight: normal; }
-
-        /* 言語切り替えボタン */
-        .lang-switch {
-            display: flex;
-            gap: 8px; /* ボタン間隔を少し広げる */
-            flex-shrink: 0; /* 縮小しない */
-        }
-        .lang-btn {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 6px 8px; /* サイズ拡大 */
-            cursor: pointer;
-            opacity: 0.6;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .lang-btn.active { opacity: 1; border-color: var(--primary); box-shadow: 0 0 5px rgba(46,125,50,0.3); }
-        .flag-icon { width: 28px; height: auto; display: block; } /* アイコンサイズ拡大 */
-
-        /* カード共通スタイル */
-        .card {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-
-        h2 {
-            font-size: 1.1rem;
-            margin: 0 0 15px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px dashed var(--border);
-            color: var(--primary);
-        }
-
-        /* グリッドレイアウト */
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
-
-        /* 入力フォーム */
-        .form-group { margin-bottom: 10px; }
-        label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 4px; }
+        body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg-body); color: var(--text); margin: 0; padding: 15px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
         
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            background: #FAFAFA;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--secondary);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
-        /* 生産量表示（リアルタイム） */
-        .prod-val {
-            text-align: right;
-            font-size: 0.8rem;
-            color: var(--text-sub);
-            font-family: 'Roboto Mono', monospace;
-            margin-top: 2px;
-            white-space: nowrap; 
-        }
-
-        /* ボタン群 */
-        .btn-group { 
-            display: flex; 
-            gap: 10px; 
-            margin-top: 20px; 
-        }
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            color: white;
-            font-size: 1rem;
-            /* フレックスボックス内での縮小を許可しつつ、最低限の幅を確保 */
-            min-width: 0; 
-            white-space: nowrap; /* 文字折り返し防止 */
-        }
-        .btn-calc { background: var(--primary); }
-        .btn-calc:hover { background: #1B5E20; transform: translateY(-2px); }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        h1 { font-size: 1.2rem; color: var(--primary); margin: 0; line-height: 1.2; }
+        .subtitle { font-size: 0.75rem; color: #5D4037; font-weight: normal; display: block; }
         
-        .btn-save { background: var(--secondary); }
-        .btn-save:hover { background: #388E3C; }
+        .card { background: var(--bg-card); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
         
-        .btn-reset { background: var(--accent); }
-        .btn-reset:hover { background: #D84315; }
-
-        /* 結果表示エリア */
-        #result-area {
-            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-            border: 1px solid #A5D6A7;
-            display: none; 
-        }
-        #result-area.show { display: block; animation: fadeIn 0.5s; }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dotted rgba(0,0,0,0.1);
-        }
-        .result-row:last-child { border-bottom: none; }
-        
-        .res-label { font-size: 0.9rem; }
-        .res-val { font-weight: bold; font-family: 'Roboto Mono', monospace; font-size: 1.1rem; }
-        
-        .res-highlight { color: #D32F2F; font-size: 1.2rem; }
-        
-        /* 達成時刻の強調スタイル */
-        .arrival-box {
-            margin-top: 20px;
-            background: rgba(255,255,255,0.6);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border: 2px solid #C2185B;
-        }
-
-        .res-time { 
-            color: #C2185B; 
-            font-weight: 900; 
-            font-size: 2.8rem; 
-            line-height: 1.1;
-            display: block;
-            margin: 5px 0;
-            text-shadow: 2px 2px 0px rgba(255,255,255,1);
+        h2 { 
+            font-size: 1rem; margin: 0 0 12px 0; color: var(--primary); 
+            border-bottom: 2px solid var(--border); padding-bottom: 6px; 
+            display: flex; justify-content: space-between; align-items: flex-end; 
         }
         
-        .res-date { 
-            display: block; 
-            font-size: 1.2rem; 
-            color: #333; 
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .km-suffix {
-            font-size: 0.75em;
-            color: #555;
-            margin-left: 4px;
-            font-weight: normal;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* スマホ調整 */
+        .grid { display: grid; gap: 12px; }
+        .cols-2 { grid-template-columns: 1fr 1fr; }
+        .cols-4 { grid-template-columns: repeat(4, 1fr); }
         @media (max-width: 600px) {
-            body { padding: 15px; }
-            
-            /* ヘッダー調整 */
-            h1 { font-size: 1.2rem; }
-            .lang-switch { gap: 6px; }
-            .flag-icon { width: 32px; } /* スマホでさらに大きく */
-
-            /* ボタンを横並びに維持 */
-            .btn-group { 
-                flex-direction: row; 
-                gap: 8px; 
-            }
-            
-            /* ボタンの文字サイズと余白を調整して一行に収める */
-            .btn {
-                padding: 12px 2px; /* 横パディングを減らす */
-                font-size: 0.85rem; /* 文字サイズを少し小さく */
-            }
-
-            .grid-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .res-time { font-size: 2.2rem; } 
-            
-            .prod-val {
-                font-size: 1rem;
-                font-weight: bold;
-                color: var(--primary);
-                margin-top: 4px;
-            }
-            
-            input, select {
-                font-size: 1rem;
-                padding: 12px 8px;
-            }
-            
-            .res-label { font-size: 0.95rem; }
-            .res-val { font-size: 1.15rem; }
+            .cols-4 { grid-template-columns: 1fr 1fr; }
         }
+
+        label { 
+            display: block; font-size: 0.9rem; font-weight: bold; color: var(--primary);
+            margin-bottom: 6px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
+
+        select, input {
+            width: 100%; padding: 12px; border: 1px solid #D7CCC8; border-radius: 8px;
+            font-size: 16px; background: #FAFAFA; box-sizing: border-box; appearance: none; color: var(--text);
+        }
+        select:focus, input:focus { border-color: var(--primary); background: #FFF; outline: none; box-shadow: 0 0 0 2px rgba(78, 52, 46, 0.1); }
+        
+        .sub-val { 
+            font-size: 1.0rem; font-weight: bold; text-align: right; 
+            color: var(--primary); font-family: 'Roboto Mono'; 
+            margin-top: 4px; min-height: 1.5em;
+        }
+
+        /* 結果カードの背景色調整 */
+        .result-card { background: #EFEBE9; border: 2px solid #8D6E63; }
+        
+        .res-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(62, 39, 35, 0.15); }
+        .res-row:last-child { border: none; }
+        .res-val { font-family: 'Roboto Mono'; font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+        
+        .highlight-box {
+            background: #FFF; border-radius: 8px; padding: 15px; text-align: center;
+            margin-top: 12px; border: 2px solid var(--accent);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        #status-msg { font-weight: bold; color: #5D4037; font-size: 0.9rem; margin-bottom: 0; }
+
+        .big-time { 
+            font-size: 2.6rem; font-weight: 900; color: var(--accent); 
+            line-height: 1; margin: 2px 0 0 0; letter-spacing: -1px;
+        }
+        
+        .big-date { 
+            font-size: 1.2rem; font-weight: bold; color: #5D4037; 
+            margin-bottom: 8px; display: block;
+        }
+        
+        /* 不足分エリアの配色調整 */
+        .shortage-area {
+            background: #FBE9E7; /* 薄い赤茶 */
+            border-radius: 6px;
+            padding: 6px 12px;
+            display: flex; align-items: baseline; gap: 6px;
+            color: var(--accent);
+        }
+        .short-label { font-size: 0.85rem; font-weight: bold; opacity: 0.9; }
+        #res-short { font-size: 1.3rem; font-weight: 900; font-family: 'Roboto Mono'; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: #fff; cursor: pointer; font-size: 0.9rem; }
+        .btn-save { background: var(--primary); }
+        .btn-reset { background: var(--btn-gray); }
+        
+        .time-row { display: flex; gap: 8px; }
+        .btn-now {
+            background: var(--primary); color: white; border: none; border-radius: 8px;
+            padding: 0 12px; font-weight: bold; cursor: pointer; font-size: 0.8rem;
+            white-space: nowrap; display: flex; align-items: center; justify-content: center;
+        }
+        
+        .lang-switch { display: flex; gap: 12px; }
+        .flag-icon { 
+            width: 36px; height: auto; cursor: pointer; opacity: 0.4; 
+            filter: grayscale(100%); transition: all 0.2s ease; 
+            border-radius: 4px; border: 2px solid transparent;
+        }
+        .flag-icon.active { 
+            opacity: 1; filter: grayscale(0%); transform: scale(1.1); 
+            border-color: var(--primary); box-shadow: 0 2px 5px rgba(62, 39, 35, 0.2);
+        }
+        .unit { font-size: 0.8em; color: #6D4C41; font-weight: normal; margin-left: 1px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>
-            <span data-t="title">コーヒー生産計算機</span>
-            <span class="subtitle">LastWar: Survival Season 5</span>
-        </h1>
+        <h1><span data-t="title">生産計算機</span> <span class="subtitle">LastWar S5 Coffee Calc</span></h1>
         <div class="lang-switch">
-            <button class="lang-btn active" onclick="setLang('ja')"><img src="https://flagcdn.com/w40/jp.png" class="flag-icon"></button>
-            <button class="lang-btn" onclick="setLang('en')"><img src="https://flagcdn.com/w40/us.png" class="flag-icon"></button>
+            <img src="https://flagcdn.com/w80/jp.png" class="flag-icon active" onclick="app.setLang('ja')" alt="JP">
+            <img src="https://flagcdn.com/w80/us.png" class="flag-icon" onclick="app.setLang('en')" alt="EN">
         </div>
     </header>
 
     <div class="card">
-        <h2 data-t="h_factory">生産施設設定</h2>
-        <div class="grid-4" id="factory-container">
+        <h2>
+            <span data-t="h_prod">生産設定</span>
+            <span id="total-prod" style="font-family:'Roboto Mono'; font-size:1.1rem; color:var(--primary);">0/h</span>
+        </h2>
+        <div class="grid cols-4" id="factory-area">
             </div>
-        <hr style="border: 0; border-top: 1px dashed #ddd; margin: 15px 0;">
-        <div class="form-group">
-            <label data-t="weekly">週間配達</label>
-            <select id="weekly-lv" onchange="updatePreview()"></select>
-            <div class="prod-val" id="weekly-val">0/h</div>
-        </div>
-        
-        <div style="background: #f1f8e9; padding: 10px; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: bold; color: var(--primary);" data-t="total_prod">総生産量:</span>
-            <span style="font-weight: bold; font-size: 1.1rem;" id="total-preview">0/h</span>
+        <div style="margin-top:15px;" class="grid cols-2">
+            <div>
+                <label data-t="weekly">週間配達</label>
+                <select id="weekly-lv" data-type="prod" onchange="app.calc()"></select>
+            </div>
+            <div>
+                <label data-t="time">現在時刻</label>
+                <div class="time-row">
+                    <input type="time" id="now-time" onchange="app.calc()" onblur="app.calc()">
+                    <button class="btn-now" onclick="app.setNow()" data-t="btn_now">現在</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="card">
-        <h2 data-t="h_lab">研究所 & 目標</h2>
-        <div class="grid-2">
-            <div class="form-group">
-                <label data-t="current_lab">現在研究所Lv</label>
-                <select id="lab-current"></select>
+        <h2 data-t="h_status">目標と在庫</h2>
+        <div class="grid cols-2">
+            <div>
+                <label data-t="cur_lv">現在 Lv</label>
+                <select id="lab-cur" data-type="cost" onchange="app.calc()"></select>
             </div>
-            <div class="form-group">
-                <label data-t="target_lab">目標研究所Lv</label>
-                <select id="lab-target"></select>
+            <div>
+                <label data-t="tgt_lv">目標 Lv</label>
+                <select id="lab-tgt" data-type="cost" onchange="app.calc()"></select>
             </div>
-        </div>
-        <div class="grid-2">
-            <div class="form-group">
-                <label data-t="stock">現在の保有量</label>
-                <input type="text" id="stock" value="0" placeholder="0" onblur="formatStock(this)" onfocus="unformatStock(this)">
+            <div>
+                <label data-t="stock">保有量</label>
+                <input type="text" id="stock" placeholder="0 (1k, 1m...)" onfocus="this.select()" oninput="app.calc()">
             </div>
-            <div class="form-group">
-                <label data-t="reduction">消費減少率 (%)</label>
-                <select id="reduction"></select>
+            <div>
+                <label data-t="disc">割引率 (%)</label>
+                <select id="discount" data-type="cost" onchange="app.calc()"></select>
             </div>
         </div>
-        <div class="form-group">
-            <label data-t="time">現在時刻</label>
-            <div style="display: flex; gap: 5px;">
-                <input type="time" id="now-time">
-                <button onclick="setNowTime()" style="width: 50px; background:var(--secondary); color:white; border:none; border-radius:5px;">↻</button>
+    </div>
+
+    <div class="card result-card">
+        <h2 data-t="h_res">計算結果</h2>
+        <div class="res-row">
+            <span data-t="r_daily">日産</span>
+            <span class="res-val" id="res-daily">0</span>
+        </div>
+        <div class="res-row">
+            <span data-t="r_cost">必要総数</span>
+            <span class="res-val" id="res-cost">0</span>
+        </div>
+        <div class="res-row">
+            <span data-t="r_virus">ウイルス耐性</span>
+            <span class="res-val" id="res-virus">0 → 0</span>
+        </div>
+        
+        <div class="highlight-box">
+            <div id="status-msg">入力待ち</div>
+            
+            <span class="big-time" id="res-time">--:--</span>
+            <span class="big-date" id="res-date">--/--</span>
+            
+            <div class="shortage-area">
+                <span data-t="r_short" class="short-label">不足</span>
+                <span id="res-short">0</span>
             </div>
         </div>
     </div>
 
     <div class="btn-group">
-        <button class="btn btn-calc" onclick="calculate()" data-t="btn_calc">計算する</button>
-        <button class="btn btn-save" onclick="saveData()" data-t="btn_save">保存</button>
-        <button class="btn btn-reset" onclick="resetData()" data-t="btn_reset">リセット</button>
-    </div>
-
-    <div class="card" id="result-area">
-        <h2 data-t="h_result">計算結果</h2>
-        
-        <div class="result-row">
-            <span class="res-label" data-t="res_daily">1日あたりの生産量</span>
-            <span class="res-val" id="out-daily">0</span>
-        </div>
-
-        <div class="result-row">
-            <span class="res-label" data-t="res_lab_lv">研究所Lv</span>
-            <span class="res-val" id="out-lab-lv">--</span>
-        </div>
-
-        <div class="result-row">
-            <span class="res-label" data-t="res_virus">ウイルス耐性</span>
-            <span class="res-val" id="out-virus">0 → 0</span>
-        </div>
-        <div class="result-row">
-            <span class="res-label" data-t="res_cost">必要総コスト (割引後)</span>
-            <span class="res-val" id="out-cost">0</span>
-        </div>
-        <div class="result-row">
-            <span class="res-label" data-t="res_shortage">不足分</span>
-            <span class="res-val res-highlight" id="out-shortage">0</span>
-        </div>
-        
-        <div class="arrival-box">
-            <span class="res-label" data-t="res_time" style="font-weight:bold; color:#555;">達成予想日時</span>
-            <span class="res-date" id="out-date">--/--</span>
-            <span class="res-time" id="out-time">--:--</span>
-        </div>
+        <button class="btn btn-save" onclick="app.save()" data-t="btn_save">設定を保存</button>
+        <button class="btn btn-reset" onclick="app.reset()" data-t="btn_reset">リセット</button>
     </div>
 </div>
 
 <script>
-    /* ============================================
-       DATA CONFIGURATION (Lv 1-60)
-       ============================================ */
-    const PROD_PER_LV = 720; // 生産量係数
-    const MAX_LV = 60;       // 最大レベル設定
-
-    // 研究所コスト (Lv1 - Lv31)
-    const LAB_COSTS = {
-        1: 700, 2: 11200, 3: 22400, 4: 44800, 5: 89600,
-        6: 125400, 7: 150500, 8: 180600, 9: 216800, 10: 261000,
-        11: 312100, 12: 403900, 13: 444300, 14: 488800, 15: 537600,
-        16: 591400, 17: 650500, 18: 715600, 19: 787200, 20: 865900,
-        21: 874500, 22: 883300, 23: 892100, 24: 901000, 25: 910000,
-        26: 919100, 27: 928300, 28: 937600, 29: 947000, 30: 956500,
-        31: 966000, 32: 975700, 33: 985500, 34: 995300, 35: 1005300,
-        36: 1015300, 37: 0, 38: 0, 39: 0, 40: 0, 
-        41: 0, 42: 0, 43: 0, 44: 0, 45: 0,
-        46: 0, 47: 0, 48: 0, 49: 0, 50: 0,
-        51: 0, 52: 0, 53: 0, 54: 0, 55: 0,
-        56: 0, 57: 0, 58: 0, 59: 0, 60: 0
-    };
-
-    // ウイルス耐性 (Lv1 - Lv31)
-    const VIRUS_RES = {
-        0: 0, 1: 100, 2: 200, 3: 300, 4: 400, 5: 500,
-        6: 750, 7: 1000, 8: 1250, 9: 1500, 10: 1750,
-        11: 2000, 12: 2250, 13: 2500, 14: 2750, 15: 3000,
-        16: 3250, 17: 3500, 18: 3750, 19: 4000, 20: 4250,
-        21: 4500, 22: 4750, 23: 5000, 24: 5250, 25: 5500,
-        26: 5750, 27: 6000, 28: 6250, 29: 6500, 30: 6750,
-        31: 7000, 32: 7250, 33: 7500, 34: 7750, 35: 8000,
-        36: 8250, 37: 8500, 38: 8750, 39: 9000, 40: 9250,
-        41: 9500, 42: 9750, 43: 10000, 44: 10250, 45: 10500,
-        46: 11000, 47: 11500, 48: 12000, 49: 12500
-    };
-
-    // Lv33以降 Lv60までは自動的に0で埋める
-    for (let i = 61; i <= MAX_LV; i++) {
-        LAB_COSTS[i] = 0;
-        VIRUS_RES[i] = 0;
-    }
-
-    // 翻訳データ
-    const LANG = {
-        ja: {
-            title: "コーヒー生産計算機",
-            h_factory: "生産施設設定",
-            weekly: "週間配達",
-            total_prod: "総生産量:",
-            h_lab: "研究所 & 目標",
-            current_lab: "現在研究所Lv",
-            target_lab: "目標研究所Lv",
-            stock: "現在の保有量",
-            reduction: "消費減少率 (%)",
-            time: "現在時刻",
-            btn_calc: "計算する",
-            btn_save: "保存",
-            btn_reset: "リセット",
-            h_result: "計算結果",
-            res_lab_lv: "研究所Lv",
-            res_daily: "1日あたりの生産量",
-            res_virus: "ウイルス耐性",
-            res_cost: "必要総コスト",
-            res_shortage: "不足分",
-            res_time: "達成予想日時",
-            factory_prefix: "工場",
-            not_built: "未建造",
-            msg_saved: "保存しました",
-            msg_reset: "リセットしました"
-        },
-        en: {
-            title: "Coffee Production Calc",
-            h_factory: "Factory Settings",
-            weekly: "Weekly Delivery",
-            total_prod: "Total Production:",
-            h_lab: "Lab & Target",
-            current_lab: "Current Lab Lv",
-            target_lab: "Target Lab Lv",
-            stock: "Current Stock",
-            reduction: "Resource Reduction (%)",
-            time: "Current Time",
-            btn_calc: "Calculate",
-            btn_save: "Save",
-            btn_reset: "Reset",
-            h_result: "Result",
-            res_lab_lv: "Lab Level",
-            res_daily: "Daily Production",
-            res_virus: "Virus Resistance",
-            res_cost: "Total Cost",
-            res_shortage: "Shortage",
-            res_time: "Est. Completion",
-            factory_prefix: "Factory",
-            not_built: "Not Built",
-            msg_saved: "Saved!",
-            msg_reset: "Reset!"
-        }
-    };
-
-    let curLang = 'ja';
-
-    /* ============================================
-       LOGIC & UI
-       ============================================ */
+const app = (() => {
+    const SAVE_KEY = 's5_coffee_v3_safe'; 
+    const MAX_LV = 60;
+    const PROD_BASE = 720;
     
-    window.onload = () => {
-        initUI();
-        loadData();
-        setNowTime();
+    const COSTS = [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 261000, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1015300]; 
+    while(COSTS.length <= MAX_LV) COSTS.push(0);
+
+    const VIRUS = [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 10250, 10500, 11000, 11500, 12000, 12500];
+    while(VIRUS.length <= MAX_LV) VIRUS.push(0);
+
+    const TEXT = {
+        ja: { title: "生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "1日あたり", r_cost: "必要コスト", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "到達予想", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
+        en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting（Caffeine Institute）", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Per Day", r_cost: "Total Cost", r_virus: "Virus Ressistance", r_short: "Shortage", btn_save: "Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Est. Completion", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
     };
 
-    function initUI() {
-        const container = document.getElementById('factory-container');
-        for (let i = 1; i <= 4; i++) {
-            const div = document.createElement('div');
-            div.className = 'form-group';
-            div.innerHTML = `
-                <label><span data-t="factory_prefix">工房</span> ${convertToRoman(i)}</label>
-                <select id="ws${i}-lv" onchange="updatePreview()"></select>
-                <div class="prod-val" id="ws${i}-val">0/h</div>
-            `;
-            container.appendChild(div);
-            populateSelect(`ws${i}-lv`, 0, 35); 
-        }
-        populateSelect('weekly-lv', 0, 35);
-        populateSelect('lab-current', 0, MAX_LV);
-        populateSelect('lab-target', 1, MAX_LV);
+    let lang = 'ja';
+    const $ = id => document.getElementById(id);
+    const $$ = sel => document.querySelectorAll(sel);
+    const roman = n => ['','Ⅰ','Ⅱ','Ⅲ','Ⅳ'][n] || n;
+    
+    const init = () => {
+        try {
+            lang = localStorage.getItem('s5_lang') || 'ja';
+            
+            const fArea = $('factory-area');
+            if(fArea) fArea.innerHTML = ''; 
 
-        const redSel = document.getElementById('reduction');
-        for (let i = 0; i <= 15; i+=0.5) {
-            redSel.add(new Option(i.toFixed(1) + '%', i));
-        }
-
-        setLang(localStorage.getItem('s5_lang') || 'ja');
-    }
-
-    // --- K/M入力対応ロジック ---
-    function parseStock(val) {
-        if (!val) return 0;
-        let str = String(val).toLowerCase().replace(/,/g, '').trim();
-        let multi = 1;
-        
-        if (str.endsWith('k')) {
-            multi = 1000;
-            str = str.slice(0, -1);
-        } else if (str.endsWith('m')) {
-            multi = 1000000;
-            str = str.slice(0, -1);
-        }
-        
-        const num = parseFloat(str);
-        return isNaN(num) ? 0 : Math.floor(num * multi);
-    }
-
-    function formatStock(input) {
-        const num = parseStock(input.value);
-        input.value = num.toLocaleString();
-    }
-
-    function unformatStock(input) {
-        const val = parseStock(input.value);
-        if (val === 0) {
-            input.value = '';
-        } else {
-            input.value = val;
-        }
-    }
-
-    function formatKM(num) {
-        if (num >= 1000000) {
-            const mVal = (num / 1000000).toFixed(2).replace(/\.00$/, '');
-            return `<span class="km-suffix">(${mVal}M)</span>`;
-        }
-        if (num >= 1000) {
-            const kVal = (num / 1000).toFixed(1).replace(/\.0$/, '');
-            return `<span class="km-suffix">(${kVal}K)</span>`;
-        }
-        return '';
-    }
-
-    function calculate() {
-        let totalH = 0;
-        for (let i = 1; i <= 4; i++) {
-            const lv = parseInt(document.getElementById(`ws${i}-lv`).value) || 0;
-            totalH += lv * PROD_PER_LV;
-        }
-        const wLv = parseInt(document.getElementById(`weekly-lv`).value) || 0;
-        totalH += wLv * PROD_PER_LV;
-
-        if (totalH === 0) {
-            alert("生産量が0です。施設レベルを設定してください。");
-            return;
-        }
-
-        const curLab = parseInt(document.getElementById('lab-current').value);
-        const tgtLab = parseInt(document.getElementById('lab-target').value);
-        
-        if (curLab >= tgtLab) {
-            alert("目標Lvは現在Lvより大きくしてください。");
-            return;
-        }
-
-        let rawCost = 0;
-        for (let i = curLab + 1; i <= tgtLab; i++) {
-            if (LAB_COSTS[i] !== undefined) rawCost += LAB_COSTS[i];
-        }
-
-        const rate = parseFloat(document.getElementById('reduction').value) || 0;
-        const realCost = Math.ceil(rawCost * (1 - rate/100));
-        const stock = parseStock(document.getElementById('stock').value);
-        
-        const shortage = Math.max(0, realCost - stock);
-
-        const timeElem = document.getElementById('out-time');
-        const dateElem = document.getElementById('out-date');
-        
-        if (shortage <= 0) {
-            timeElem.innerText = "達成済み";
-            timeElem.style.color = "green";
-            dateElem.innerText = "";
-        } else {
-            const hoursNeeded = shortage / totalH;
-            const nowVal = document.getElementById('now-time').value;
-            const now = new Date();
-            if (nowVal) {
-                const [h, m] = nowVal.split(':');
-                now.setHours(h, m);
+            for(let i=1; i<=4; i++) {
+                const div = document.createElement('div');
+                div.innerHTML = `<label><span data-t="f_prefix"></span> ${roman(i)}</label><select id="f${i}" data-type="prod" onchange="app.calc()"></select><div id="fv${i}" class="sub-val">0</div>`;
+                if(fArea) fArea.appendChild(div);
+                fillSel(`f${i}`, 0, 35);
             }
-            now.setMinutes(now.getMinutes() + (hoursNeeded * 60));
+            fillSel('weekly-lv', 0, 35);
+            fillSel('lab-cur', 0, MAX_LV);
+            fillSel('lab-tgt', 1, MAX_LV);
+            
+            const dSel = $('discount');
+            for(let i=0; i<=20; i+=0.5) dSel.add(new Option(i.toFixed(1)+'%', i));
 
-            dateElem.innerText = `${now.getMonth()+1}月${now.getDate()}日`;
-            timeElem.innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            timeElem.style.color = "#C2185B";
+            try { load(); } catch(e) { console.warn("Load skipped", e); }
+            
+            setLang(lang);
+            
+            setTimeout(() => {
+                if(!($('now-time').value)) setNow();
+                calc();
+            }, 50);
+
+        } catch(err) {
+            console.error("Init Fatal Error:", err);
         }
+    };
 
-        // --- 結果表示の更新 ---
-        
-        // 研究所Lv表示
-        const curLabText = curLab === 0 ? LANG[curLang].not_built : `Lv.${curLab}`;
-        const tgtLabText = `Lv.${tgtLab}`;
-        document.getElementById('out-lab-lv').innerText = `${curLabText} → ${tgtLabText}`;
+    const fillSel = (id, min, max) => {
+        const s = $(id);
+        if(!s) return;
+        s.innerHTML = '';
+        if(min===0) s.add(new Option('-', 0));
+        for(let i=Math.max(1, min); i<=max; i++) s.add(new Option('Lv.'+i, i));
+    };
 
-        document.getElementById('out-daily').innerHTML = fmt(totalH * 24) + formatKM(totalH * 24);
-        
-        const virusFrom = VIRUS_RES[curLab] !== undefined ? fmt(VIRUS_RES[curLab]) : '??';
-        const virusTo = VIRUS_RES[tgtLab] !== undefined ? fmt(VIRUS_RES[tgtLab]) : '??';
-        document.getElementById('out-virus').innerText = `${virusFrom} → ${virusTo}`;
-        
-        document.getElementById('out-cost').innerHTML = fmt(realCost) + formatKM(realCost);
-        document.getElementById('out-shortage').innerHTML = fmt(shortage) + formatKM(shortage);
+    const calc = () => {
+        try {
+            let totalH = 0;
+            for(let i=1; i<=4; i++) {
+                const elInput = $(`f${i}`);
+                const elVal = $(`fv${i}`);
+                if(!elInput || !elVal) continue; 
 
-        document.getElementById('result-area').classList.add('show');
-        document.getElementById('result-area').scrollIntoView({behavior:'smooth'});
-    }
+                const lv = parseInt(elInput.value)||0;
+                const val = lv * PROD_BASE;
+                elVal.innerHTML = fmtKM(val, true);
+                totalH += val;
+            }
+            
+            const elWeekly = $('weekly-lv');
+            const wLv = elWeekly ? (parseInt(elWeekly.value)||0) : 0;
+            totalH += wLv * PROD_BASE;
+            
+            const elTotal = $('total-prod');
+            const elDaily = $('res-daily');
+            if(elTotal) elTotal.innerHTML = fmtKM(totalH, true) + '/h';
+            if(elDaily) elDaily.innerHTML = fmtKM(totalH * 24, true);
 
-    function updatePreview() {
-        let total = 0;
-        for(let i=1; i<=4; i++) {
-            const lv = parseInt(document.getElementById(`ws${i}-lv`).value)||0;
-            const val = lv * PROD_PER_LV;
-            document.getElementById(`ws${i}-val`).innerHTML = fmt(val) + formatKM(val) + '/h';
-            total += val;
+            const elLC = $('lab-cur');
+            const elLT = $('lab-tgt');
+            const cLv = elLC ? parseInt(elLC.value) : 0;
+            const tLv = elLT ? parseInt(elLT.value) : 0;
+            let rawCost = 0;
+            
+            if(cLv < tLv) {
+                for(let i = cLv + 1; i <= tLv; i++) rawCost += (COSTS[i] || 0);
+            }
+            
+            const elDisc = $('discount');
+            const rate = elDisc ? (parseFloat(elDisc.value) || 0) : 0;
+            const realCost = Math.ceil(rawCost * (1 - rate/100));
+            
+            const elRC = $('res-cost');
+            const elRV = $('res-virus');
+            if(elRC) elRC.innerHTML = fmtKM(realCost, true);
+            if(elRV) elRV.textContent = `${fmt(VIRUS[cLv]||0)} → ${fmt(VIRUS[tLv]||0)}`;
+
+            const elStock = $('stock');
+            const stock = parseStock(elStock ? elStock.value : 0);
+            const shortage = Math.max(0, realCost - stock);
+            
+            const elShort = $('res-short');
+            if(elShort) elShort.innerHTML = fmtKM(shortage, true);
+
+            const timeEl = $('res-time');
+            const dateEl = $('res-date');
+            const msgEl = $('status-msg');
+            if(!timeEl || !msgEl) return;
+            
+            if(shortage <= 0) {
+                msgEl.textContent = TEXT[lang].msg_ok;
+                msgEl.style.color = "#4E342E"; /* 濃い茶色 */
+                timeEl.textContent = "OK";
+                timeEl.style.color = "#4E342E";
+                if(dateEl) dateEl.textContent = "";
+            } else {
+                if(totalH <= 0) {
+                    msgEl.textContent = TEXT[lang].msg_stop;
+                    msgEl.style.color = "#8D6E63";
+                    timeEl.textContent = "---";
+                    timeEl.style.color = "#8D6E63";
+                    if(dateEl) dateEl.textContent = "--/--";
+                    return;
+                }
+                
+                const hoursNeeded = shortage / totalH;
+                const elNow = $('now-time');
+                const baseTime = elNow ? elNow.value.split(':') : ['00','00'];
+                if(baseTime.length < 2) return;
+                
+                const d = new Date();
+                d.setHours(baseTime[0] || 0, baseTime[1] || 0, 0, 0);
+                d.setMinutes(d.getMinutes() + (hoursNeeded * 60));
+
+                msgEl.textContent = TEXT[lang].msg_wait;
+                msgEl.style.color = "#5D4037";
+                timeEl.textContent = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
+                timeEl.style.color = "#BF360C";
+                if(dateEl) dateEl.textContent = `${d.getMonth()+1}/${d.getDate()}`;
+            }
+        } catch(e) {
+            console.error("Calc Error:", e);
         }
-        const wLv = parseInt(document.getElementById('weekly-lv').value)||0;
-        const wVal = wLv * PROD_PER_LV;
-        document.getElementById('weekly-val').innerHTML = fmt(wVal) + formatKM(wVal) + '/h';
-        total += wVal;
+    };
 
-        document.getElementById('total-preview').innerHTML = fmt(total) + formatKM(total) + '/h';
-    }
+    const fmt = n => n.toLocaleString();
+    const pz = n => String(n).padStart(2, '0');
+    
+    const parseStock = v => {
+        if(!v) return 0;
+        let s = v.toString().toLowerCase().replace(/,/g,'');
+        let m = 1;
+        if(s.endsWith('k')) { m=1000; s=s.slice(0,-1); }
+        else if(s.endsWith('m')) { m=1000000; s=s.slice(0,-1); }
+        return Math.floor(parseFloat(s)||0) * m;
+    };
 
-    function populateSelect(id, min, max) {
-        const sel = document.getElementById(id);
-        sel.innerHTML = ''; 
-        
-        const notBuiltText = LANG[curLang].not_built;
-        sel.add(new Option(notBuiltText, 0));
-        
-        for(let i=Math.max(1, min); i<=max; i++) {
-            sel.add(new Option(`Lv.${i}`, i));
-        }
-    }
+    const fmtKM = (n, detailed=false) => {
+        if(n >= 1000000) return (n/1000000).toFixed(2) + '<span class="unit">M</span>';
+        if(n >= 1000) return (n/1000).toFixed(2) + '<span class="unit">K</span>';
+        return fmt(n);
+    };
 
-    function setNowTime() {
+    const setNow = () => {
         const d = new Date();
-        document.getElementById('now-time').value = 
-            ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
-    }
+        const tStr = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
+        const el = $('now-time');
+        if(el) el.value = tStr;
+        calc();
+    };
 
-    function fmt(num) { return num.toLocaleString(); }
-
-    function convertToRoman(num) {
-        const roman = {1:'Ⅰ', 2:'Ⅱ', 3:'Ⅲ', 4:'Ⅳ'};
-        return roman[num] || num;
-    }
-
-    function saveData() {
+    const save = () => {
         const data = {
-            ws: [],
-            weekly: document.getElementById('weekly-lv').value,
-            labC: document.getElementById('lab-current').value,
-            labT: document.getElementById('lab-target').value,
-            stock: document.getElementById('stock').value,
-            red: document.getElementById('reduction').value
+            fs: [1,2,3,4].map(i => $(`f${i}`).value),
+            wk: $('weekly-lv').value,
+            lc: $('lab-cur').value,
+            lt: $('lab-tgt').value,
+            st: $('stock').value,
+            ds: $('discount').value
         };
-        for(let i=1; i<=4; i++) data.ws.push(document.getElementById(`ws${i}-lv`).value);
-        
-        localStorage.setItem('s5_calc_data_v9', JSON.stringify(data));
-        alert(LANG[curLang].msg_saved);
-    }
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        alert(lang === 'ja' ? '保存しました' : 'Saved');
+    };
 
-    function loadData() {
-        const raw = localStorage.getItem('s5_calc_data_v9');
+    const load = () => {
+        const raw = localStorage.getItem(SAVE_KEY);
         if(raw) {
-            const data = JSON.parse(raw);
-            if(data.ws) {
-                data.ws.forEach((lv, idx) => document.getElementById(`ws${idx+1}-lv`).value = lv);
-            }
-            if(data.weekly) document.getElementById('weekly-lv').value = data.weekly;
-            if(data.labC) document.getElementById('lab-current').value = data.labC;
-            if(data.labT) document.getElementById('lab-target').value = data.labT;
-            if(data.stock) {
-                const input = document.getElementById('stock');
-                input.value = data.stock;
-                formatStock(input); 
-            }
-            if(data.red) document.getElementById('reduction').value = data.red;
-            updatePreview();
+            const d = JSON.parse(raw);
+            if(d.fs) d.fs.forEach((v,i) => {
+                const el = $(`f${i+1}`);
+                if(el) el.value = v;
+            });
+            if(d.wk) $('weekly-lv').value = d.wk;
+            if(d.lc) $('lab-cur').value = d.lc;
+            if(d.lt) $('lab-tgt').value = d.lt;
+            if(d.st) $('stock').value = d.st;
+            if(d.ds) $('discount').value = d.ds;
         }
-    }
+    };
+    
+    const reset = () => {
+        if(confirm('Reset?')) { localStorage.removeItem(SAVE_KEY); location.reload(); }
+    };
 
-    function resetData() {
-        if(confirm("リセットしますか？")) {
-            localStorage.removeItem('s5_calc_data_v9');
-            location.reload();
-        }
-    }
-
-    function setLang(lang) {
-        curLang = lang;
-        localStorage.setItem('s5_lang', lang);
-        
-        document.querySelectorAll('[data-t]').forEach(el => {
-            const key = el.getAttribute('data-t');
-            if(LANG[lang][key]) el.innerText = LANG[lang][key];
+    const setLang = (l) => {
+        lang = l;
+        localStorage.setItem('s5_lang', l);
+        $$('[data-t]').forEach(el => {
+            if(TEXT[l][el.getAttribute('data-t')]) {
+                el.textContent = TEXT[l][el.getAttribute('data-t')];
+            }
         });
+        $$('.flag-icon').forEach(e => e.classList.toggle('active', e.getAttribute('onclick').includes(l)));
+        calc();
+    };
 
-        const currentVals = {};
-        document.querySelectorAll('select').forEach(s => currentVals[s.id] = s.value);
-        
-        populateSelect('weekly-lv', 0, 35);
-        populateSelect('lab-current', 0, MAX_LV);
-        populateSelect('lab-target', 1, MAX_LV);
-        for(let i=1; i<=4; i++) populateSelect(`ws${i}-lv`, 0, 35);
-        
-        Object.keys(currentVals).forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.value = currentVals[id];
-        });
+    return { init, calc, save, reset, setLang, setNow };
+})();
 
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
-    }
+document.addEventListener('DOMContentLoaded', app.init);
 </script>
 </body>
 </html>
-
-
-
