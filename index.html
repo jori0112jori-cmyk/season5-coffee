@@ -121,7 +121,7 @@
 
 <div class="container">
     <header>
-        <h1><span data-t="title">コーヒー生産計算機</span> <span class="subtitle">LastWar S5 Coffee Calc</span></h1>
+        <h1><span data-t="title">コーヒー生産計算機</span> <span class="subtitle">LastWar S5 Coffee Calc　Lv.39</span></h1>
         <div class="lang-switch">
             <img src="https://flagcdn.com/w80/jp.png" class="flag-icon active" onclick="app.setLang('ja')" alt="JP">
             <img src="https://flagcdn.com/w80/us.png" class="flag-icon" onclick="app.setLang('en')" alt="EN">
@@ -219,7 +219,7 @@ const app = (() => {
     while(VIRUS.length <= MAX_LV) VIRUS.push(0);
 
     const TEXT = {
-        ja: { title: "生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "最大生産時間（24ｈ）", r_cost: "必要コスト", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "到達予想", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
+        ja: { title: "コーヒー生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "最大生産時間（24ｈ）", r_cost: "必要コスト", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "到達予想", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
         en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting（Caffeine Institute）", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Total Cost", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Est. Completion", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
     };
 
@@ -438,6 +438,7 @@ document.addEventListener('DOMContentLoaded', app.init);
 </script>
 </body>
 </html>
+
 
 
 
