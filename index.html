@@ -239,9 +239,9 @@ const app = (() => {
                 const div = document.createElement('div');
                 div.innerHTML = `<label><span data-t="f_prefix"></span> ${roman(i)}</label><select id="f${i}" data-type="prod" onchange="app.calc()"></select><div id="fv${i}" class="sub-val">0</div>`;
                 if(fArea) fArea.appendChild(div);
-                fillSel(`f${i}`, 0, 35);
+                fillSel(`f${i}`, 0, 30);
             }
-            fillSel('weekly-lv', 0, 35);
+            fillSel('weekly-lv', 0, 30);
             fillSel('lab-cur', 0, MAX_LV);
             fillSel('lab-tgt', 1, MAX_LV);
             
@@ -438,6 +438,7 @@ document.addEventListener('DOMContentLoaded', app.init);
 </script>
 </body>
 </html>
+
 
 
 
