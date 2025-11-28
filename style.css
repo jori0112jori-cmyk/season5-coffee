@@ -111,7 +111,7 @@ select:focus, input:focus {
 
 /* --- Buttons --- */
 .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: #fff; cursor: pointer; font-size: 0.9rem; }
+.btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: #fff; cursor: pointer; font-size: 0.9rem;　transition: transform 0.1s, box-shadow 0.1s; /* 追加 */ }
 .btn-save { background: var(--c-primary); }
 .btn-reset { background: var(--c-btn); }
 
@@ -120,6 +120,11 @@ select:focus, input:focus {
     background: var(--c-primary); color: white; border: none; border-radius: 8px;
     padding: 0 12px; font-weight: bold; cursor: pointer; font-size: 0.8rem;
     white-space: nowrap;
+/* 新規追加: ボタンを押した時の動き */
+.btn:active {
+    transform: translateY(2px); /* 少し下に沈む */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); /* 内側に影を落とす */
+}
 }
 
 /* --- Language Switcher --- */
