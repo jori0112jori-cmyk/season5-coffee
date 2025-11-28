@@ -49,8 +49,14 @@ header { display: flex; justify-content: space-between; align-items: center; mar
     border: 1px solid var(--c-border);
 }
 
-.card.result-card { background: #EFEBE9; border: 2px solid #8D6E63; }
-
+.card.result-card { background: #EFEBE9; border: 2px solid #8D6E63;　box-shadow: 0 4px 12px rgba(62, 39, 35, 0.15); }
+/* 新規追加: 結果カード内の数字をより強調 */
+.res-val {
+    /* ...既存... */
+    background: rgba(255,255,255,0.5); /* 薄い白背景を敷く */
+    padding: 2px 6px;
+    border-radius: 4px;
+}
 /* --- Forms & Inputs --- */
 label { 
     display: block; font-size: 0.9rem; font-weight: bold; color: var(--c-primary);
@@ -64,8 +70,11 @@ select, input {
     color: var(--c-text); appearance: none;
 }
 select:focus, input:focus {
-    border-color: var(--c-primary); background: #FFF; outline: none;
-    box-shadow: 0 0 0 2px rgba(78, 52, 46, 0.1);
+    border-color: var(--c-accent);   /* 枠線をオレンジに */
+    background: #FFF;
+    outline: none;
+    /* ぼんやり光る影もオレンジ系に */
+    box-shadow: 0 0 0 3px rgba(191, 54, 12, 0.2);
 }
 
 /* --- Grid Layouts --- */
