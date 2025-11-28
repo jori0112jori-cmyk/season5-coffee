@@ -28,6 +28,11 @@ const app = (() => {
     
     const init = () => {
         try {
+            // 【追加】データの数に合わせてタイトルを自動更新
+        // コストデータが入っている最後のレベルを取得（0より大きい値が入っている最後のインデックス）
+        const maxDataLv = DATA.COSTS.findLastIndex(n => n > 0);
+        // タイトルを書き換え
+        document.querySelector('.subtitle').textContent = `LastWar S5 Coffee Calc (Data: Lv.${maxDataLv})`;
             lang = localStorage.getItem('s5_lang') || 'ja';
             renderUI();
             try { loadData(); } catch(e) { console.warn("Load skipped", e); }
