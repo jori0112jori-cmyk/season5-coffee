@@ -165,6 +165,11 @@ const app = (() => {
         const d = new Date();
         $('now-time').value = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
         calc();
+        // 【追加】もし日付表示用の要素があれば、日付(月/日)を書き込む
+        const elDate = $('now-date');
+        if(elDate) {
+            elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
+        }
     };
 
     const save = () => {
