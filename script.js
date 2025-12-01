@@ -212,7 +212,23 @@ const app = (() => {
         calc();
     };
 
-    return { init, calc, save, reset, setLang, setNow };
+　　　　// ↓↓↓【ここに追加】↓↓↓
+    const onCurChange = () => {
+        const cLv = parseInt($('lab-cur')?.value || 0);
+        const tEl = $('lab-tgt');
+        
+        if(tEl) {
+            // 最大レベルを超えない範囲で +1 する
+            if(cLv < CONFIG.MAX_LV) {
+                tEl.value = cLv + 1;
+            } else {
+                tEl.value = CONFIG.MAX_LV;
+            }
+        }
+        calc(); // 計算を実行
+    };
+    // ↑↑↑【ここまで】↑↑↑    
+    return { init, calc, save, reset, setLang, setNow, onCurChange };
 })();
 
 document.addEventListener('DOMContentLoaded', app.init);
