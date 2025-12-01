@@ -31,7 +31,10 @@
                 <select id="weekly-lv" onchange="app.calc()"></select>
             </div>
             <div>
-                <label data-t="time">現在時刻</label>
+               <label>
+                    <span data-t="time">現在時刻</span>
+                    <span id="now-date" style="margin-left: 8px; color: #5D4037; font-weight: bold;"></span>
+                </label>
                 <div class="time-wrapper">
                     <input type="time" id="now-time" onchange="app.calc()">
                     <button class="btn-now" onclick="app.setNow()" data-t="btn_now">現在</button>
@@ -101,6 +104,7 @@
 <script src="script.js"></script>
 </body>
 </html>
+
 
 
 
