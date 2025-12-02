@@ -28,11 +28,10 @@ const app = (() => {
     
     const init = () => {
         try {
-            // 【追加】データの数に合わせてタイトルを自動更新
-        // コストデータが入っている最後のレベルを取得（0より大きい値が入っている最後のインデックス）
-        const maxDataLv = DATA.COSTS.findLastIndex(n => n > 0);
-        // タイトルを書き換え
-        document.querySelector('.subtitle').textContent = `LastWar S5 Coffee Calc (Data: Lv.${maxDataLv})`;
+            const maxDataLv = DATA.COSTS.findLastIndex(n => n > 0);
+            const subTitle = document.querySelector('.subtitle');
+            if(subTitle) subTitle.textContent = `LastWar S5 Coffee Calc (Data: Lv.${maxDataLv})`;
+            
             lang = localStorage.getItem('s5_lang') || 'ja';
             renderUI();
             try { loadData(); } catch(e) { console.warn("Load skipped", e); }
@@ -78,6 +77,7 @@ const app = (() => {
     };
 
     const calc = () => {
+        // 1. 生産量の計算
         let hourlyProd = 0;
         for(let i=1; i<=4; i++) {
             const lv = parseInt($(`f${i}`)?.value || 0);
@@ -90,34 +90,26 @@ const app = (() => {
         $('total-prod').innerHTML = fmtKM(hourlyProd, true) + '/h';
         $('res-daily').innerHTML = fmtKM(hourlyProd * 24, true);
 
+        // 2. コストの計算（レベル毎に割引＆切り上げ）
         const cLv = parseInt($('lab-cur')?.value || 0);
         const tLv = parseInt($('lab-tgt')?.value || 0);
-        const rate = parseFloat($('discount')?.value || 0); // 先に割引率を取得
+        const rate = parseFloat($('discount')?.value || 0);
 
-        let realCost = 0; // 最終的なコスト合計
+        let realCost = 0; 
 
         if(cLv < tLv) {
             for(let i = cLv + 1; i <= tLv; i++) {
                 const baseCost = DATA.COSTS[i] || 0;
-                // 【重要】レベルごとに割引適用し、その都度切り上げ(Math.ceil)を行う
+                // レベルごとに割引適用し、その都度切り上げ
                 const discountedCost = Math.ceil(baseCost * (1 - rate/100));
                 realCost += discountedCost;
             }
         }
         
-        // ※以前の `const realCost = ...` の行は削除してください
-
-        $('res-cost').innerHTML = fmtKM(realCost, true);
-        let rawCost = 0;
-        if(cLv < tLv) {
-            for(let i = cLv + 1; i <= tLv; i++) rawCost += (DATA.COSTS[i] || 0);
-        }
-
-        const rate = parseFloat($('discount')?.value || 0);
-        
         $('res-cost').innerHTML = fmtKM(realCost, true);
         $('res-virus').textContent = `${fmt(DATA.VIRUS[cLv]||0)} → ${fmt(DATA.VIRUS[tLv]||0)}`;
 
+        // 3. 不足とステータス
         const stock = parseStock($('stock')?.value || 0);
         const shortage = Math.max(0, realCost - stock);
         $('res-short').innerHTML = fmtKM(shortage, true);
@@ -179,12 +171,12 @@ const app = (() => {
     const setNow = () => {
         const d = new Date();
         $('now-time').value = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
-        calc();
-        // 【追加】もし日付表示用の要素があれば、日付(月/日)を書き込む
+        // 日付表示
         const elDate = $('now-date');
         if(elDate) {
             elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
         }
+        calc();
     };
 
     const save = () => {
@@ -227,22 +219,20 @@ const app = (() => {
         calc();
     };
 
-　　　　// ↓↓↓【ここに追加】↓↓↓
     const onCurChange = () => {
         const cLv = parseInt($('lab-cur')?.value || 0);
         const tEl = $('lab-tgt');
         
         if(tEl) {
-            // 最大レベルを超えない範囲で +1 する
             if(cLv < CONFIG.MAX_LV) {
                 tEl.value = cLv + 1;
             } else {
                 tEl.value = CONFIG.MAX_LV;
             }
         }
-        calc(); // 計算を実行
+        calc();
     };
-    // ↑↑↑【ここまで】↑↑↑    
+    
     return { init, calc, save, reset, setLang, setNow, onCurChange };
 })();
 
