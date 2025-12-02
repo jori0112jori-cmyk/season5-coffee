@@ -102,7 +102,7 @@ const app = (() => {
         if(cLv < tLv) {
             // 現在のレベルに対応するコストを参照 (修正済み)
             for(let i = cLv; i < tLv; i++) {
-                const baseCost = DATA.COSTS[i] || 0;
+                const baseCost = DATA.COSTS[i-1] || 0;
                 // レベルごとに割引適用し、その都度切り上げ
                 const discountedCost = Math.ceil(baseCost * (1 - rate/100));
                 realCost += discountedCost;
