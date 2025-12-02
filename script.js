@@ -92,14 +92,29 @@ const app = (() => {
 
         const cLv = parseInt($('lab-cur')?.value || 0);
         const tLv = parseInt($('lab-tgt')?.value || 0);
+        const rate = parseFloat($('discount')?.value || 0); // 先に割引率を取得
+
+        let realCost = 0; // 最終的なコスト合計
+
+        if(cLv < tLv) {
+            for(let i = cLv + 1; i <= tLv; i++) {
+                const baseCost = DATA.COSTS[i] || 0;
+                // 【重要】レベルごとに割引適用し、その都度切り上げ(Math.ceil)を行う
+                const discountedCost = Math.ceil(baseCost * (1 - rate/100));
+                realCost += discountedCost;
+            }
+        }
+        
+        // ※以前の `const realCost = ...` の行は削除してください
+
+        $('res-cost').innerHTML = fmtKM(realCost, true);
         let rawCost = 0;
         if(cLv < tLv) {
             for(let i = cLv + 1; i <= tLv; i++) rawCost += (DATA.COSTS[i] || 0);
         }
 
         const rate = parseFloat($('discount')?.value || 0);
-        const realCost = Math.ceil(rawCost * (1 - rate/100));
-
+        
         $('res-cost').innerHTML = fmtKM(realCost, true);
         $('res-virus').textContent = `${fmt(DATA.VIRUS[cLv]||0)} → ${fmt(DATA.VIRUS[tLv]||0)}`;
 
