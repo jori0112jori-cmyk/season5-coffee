@@ -260,7 +260,7 @@ const app = (() => {
     const toggleAdmin = () => {
         const p = $('admin-panel');
         if(p.style.display === 'none') {
-            const pass = prompt('管理者パスワードを入力してください:');
+            
             if(pass === CONFIG.ADMIN_PASS) {
                 p.style.display = 'block';
                 $('admin-costs').value = DATA.COSTS.join(', ');
