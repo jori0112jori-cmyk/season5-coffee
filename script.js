@@ -18,7 +18,6 @@ const app = (() => {
     const CONFIG = {
         SAVE_KEY: 's5_coffee_v3_safe',
         DATA_KEY: 's5_custom_data_v1', 
-        ADMIN_PASS: '0112', // ★管理者パスワード
         MAX_LV: 60,
         PROD_BASE: 720
     };
