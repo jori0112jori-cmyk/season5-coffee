@@ -1,7 +1,4 @@
-管理者パスワードをなくすには、script.js の一番下にある toggleAdmin という関数の中の「パスワードを聞く処理（prompt）」を削除するだけでOKです。
-「ミスると嫌なので」というご希望に合わせて、パスワード機能を削除した 「パスワードなし・完全版 script.js」 を用意しました。
-これを script.js に丸ごと上書きしてください。（index.html はそのままで大丈夫です）
-script.js (パスワードなし・最終版)
+
 /* --- Static Data --- */
 // 初期データ
 const DEFAULT_DATA = {
@@ -127,8 +124,8 @@ const app = (() => {
 
         if(cLv < tLv) {
             for(let i = cLv; i < tLv; i++) {
-                const baseCost = DATA.COSTS[i-1] || 0;
-                const discountedCost = Math.ceil(baseCost * (1 - rate/100));
+                const baseCost = DATA.COSTS[i+1] || 0;
+                const discountedCost = Math.cil(baseCost * (1 - rate/100));
                 realCost += discountedCost;
             }
         }
