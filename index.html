@@ -1,3 +1,8 @@
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -11,7 +16,7 @@
 
 <div class="container">
     <header>
-        <h1><span data-t="title">コーヒー生産計算機</span> <span class="subtitle">LastWar S5 Coffee Calc Lv.49</span></h1>
+        <h1><span data-t="title">コーヒー生産計算機</span> <span class="subtitle">LastWar S5 Coffee Calc</span></h1>
         <div class="lang-switch">
             <img src="https://flagcdn.com/w80/jp.png" class="flag-icon active" onclick="app.setLang('ja')" alt="JP">
             <img src="https://flagcdn.com/w80/us.png" class="flag-icon" onclick="app.setLang('en')" alt="EN">
@@ -31,7 +36,7 @@
                 <select id="weekly-lv" onchange="app.calc()"></select>
             </div>
             <div>
-               <label>
+                <label style="white-space: nowrap;">
                     <span data-t="time">現在時刻</span>
                     <span id="now-date" style="margin-left: 8px; color: #5D4037; font-weight: bold;"></span>
                 </label>
@@ -48,7 +53,7 @@
         <div class="grid cols-2">
             <div>
                 <label data-t="cur_lv">現在 Lv</label>
-<select id="lab-cur" onchange="app.onCurChange()"></select>
+                <select id="lab-cur" onchange="app.onCurChange()"></select>
             </div>
             <div>
                 <label data-t="tgt_lv">目標 Lv</label>
@@ -57,8 +62,8 @@
             <div>
                 <label data-t="stock">保有量</label>
                 <input type="text" id="stock" placeholder="0 (1K, 1M...)" 
-       　　　　　　　　　onfocus="this.select()" oninput="app.calc()" 
-       　　　　　　　　　enterkeyhint="done">
+                       onfocus="this.select()" oninput="app.calc()" 
+                       enterkeyhint="done">
             </div>
             <div>
                 <label data-t="disc">割引率 (%)</label>
@@ -99,16 +104,38 @@
         <button class="btn btn-save" onclick="app.save()" data-t="btn_save">設定を保存</button>
         <button class="btn btn-reset" onclick="app.reset()" data-t="btn_reset">リセット</button>
     </div>
+
+    <div style="margin-top: 30px; text-align: center;">
+        <button onclick="app.toggleAdmin()" style="background:none; border:none; color:#999; text-decoration:underline; font-size:0.8rem; cursor:pointer;">
+            管理者モード (データ編集)
+        </button>
+    </div>
+
+    <div id="admin-panel" class="card" style="display:none; margin-top:10px; border: 2px solid #ccc; background: #fff;">
+        <h3 style="margin-top:0;">データ編集</h3>
+        <p style="font-size:0.8rem; color:#666;">カンマ区切りで数値を入力してください。</p>
+        
+        <div style="margin-bottom:15px;">
+            <label style="display:block; font-weight:bold;">コスト (COSTS)</label>
+            <textarea id="admin-costs" style="width:100%; height:100px; font-family:monospace; font-size:0.8rem;"></textarea>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="display:block; font-weight:bold;">ウイルス (VIRUS)</label>
+            <textarea id="admin-virus" style="width:100%; height:60px; font-family:monospace; font-size:0.8rem;"></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" style="background:#2196F3; color:white;" onclick="app.saveAdmin()">データを適用して保存</button>
+            <button class="btn" style="background:#ccc; color:#333;" onclick="app.resetAdmin()">初期値に戻す</button>
+        </div>
+        <button onclick="app.toggleAdmin()" style="margin-top:10px; width:100%; padding:10px;">閉じる</button>
+    </div>
 </div>
 
 <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
 
 
 
