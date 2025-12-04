@@ -135,7 +135,7 @@ const app = (() => {
 
         if(cLv < tLv) {
             for(let i = cLv; i < tLv; i++) {
-                const baseCost = DATA.COSTS[i-1] || 0;
+                const baseCost = DATA.COSTS[i+1] || 0;
                 const discountedCost = Math.ceil(baseCost * (1 - rate/100));
                 realCost += discountedCost;
             }
