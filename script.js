@@ -1,23 +1,32 @@
 
 /* --- Static Data --- */
-// 初期データ
+// 1. デフォルトデータの定義
 const DEFAULT_DATA = {
     COSTS: [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 260100, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1206300],
-    VIRUS: [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8400, 8550, 8700, 8850, 9000, 9200, 9400, 9600, 9900, 10200, 10500, 10700, 10900, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 13300,18000, 23000, 28000]
+    VIRUS: [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8400, 8550, 8700, 8850, 9000, 9200, 9400, 9600, 9900, 10200, 10500, 10700, 10900, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 13300,18000, 23000, 28000],
+    TEXT: {
+        ja: { title: "コーヒー生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "最大生産時間（24ｈ）", r_cost: "必要量", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "データ保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "必要量確保予測", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
+        en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting (Caffeine Inst.)", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Total Cost", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Data Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Prediction of required amount", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
+    }
 };
 
-let DATA = { COSTS: [], VIRUS: [], TEXT: {} };
-
-DATA.TEXT = {
-    ja: { title: "コーヒー生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "最大生産時間（24ｈ）", r_cost: "必要量", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "データ保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "必要量確保予測", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
-    en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting (Caffeine Inst.)", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Total Cost", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Data Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Prediction of required amount", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
+// 2. 稼働用変数の初期化（安全のため、まずはデフォルト値をコピーして入れておく）
+// これにより読み込みエラーがあっても画面が真っ白になりません
+let DATA = {
+    COSTS: [...DEFAULT_DATA.COSTS],
+    VIRUS: [...DEFAULT_DATA.VIRUS],
+    TEXT: DEFAULT_DATA.TEXT
 };
+
+// 安全に配列を拡張
+while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
+while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
 
 /* --- App Logic --- */
 const app = (() => {
     const CONFIG = {
         SAVE_KEY: 's5_coffee_v3_safe',
-        DATA_KEY: 's5_custom_data_v1', 
+        DATA_KEY: 's5_custom_data_v1',
         MAX_LV: 60,
         PROD_BASE: 720
     };
@@ -30,7 +39,10 @@ const app = (() => {
     
     const init = () => {
         try {
+            // ここで保存された管理者データがあれば上書きする
             loadMasterData();
+
+            // データ数に合わせてタイトル更新
             const maxDataLv = DATA.COSTS.findLastIndex(n => n > 0);
             const subTitle = document.querySelector('.subtitle');
             if(subTitle) subTitle.textContent = `LastWar S5 Coffee Calc (Data: Lv.${maxDataLv})`;
@@ -45,6 +57,7 @@ const app = (() => {
             }, 50);
         } catch(err) {
             console.error("Init Error:", err);
+            alert("初期化エラーが発生しました。");
         }
     };
 
@@ -53,23 +66,21 @@ const app = (() => {
         if(raw) {
             try {
                 const custom = JSON.parse(raw);
-                DATA.COSTS = custom.COSTS || [...DEFAULT_DATA.COSTS];
-                DATA.VIRUS = custom.VIRUS || [...DEFAULT_DATA.VIRUS];
+                if(custom.COSTS && Array.isArray(custom.COSTS)) {
+                    DATA.COSTS = custom.COSTS;
+                }
+                if(custom.VIRUS && Array.isArray(custom.VIRUS)) {
+                    DATA.VIRUS = custom.VIRUS;
+                }
                 console.log("Custom data loaded");
             } catch(e) {
                 console.error("Data Load Error", e);
-                useDefaultData();
+                // エラー時はデフォルトのまま進むので何もしない
             }
-        } else {
-            useDefaultData();
         }
+        // 安全策：長さ確保
         while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
         while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
-    };
-
-    const useDefaultData = () => {
-        DATA.COSTS = [...DEFAULT_DATA.COSTS];
-        DATA.VIRUS = [...DEFAULT_DATA.VIRUS];
     };
 
     const renderUI = () => {
@@ -124,8 +135,8 @@ const app = (() => {
 
         if(cLv < tLv) {
             for(let i = cLv; i < tLv; i++) {
-                const baseCost = DATA.COSTS[i+1] || 0;
-                const discountedCost = Math.cil(baseCost * (1 - rate/100));
+                const baseCost = DATA.COSTS[i-1] || 0;
+                const discountedCost = Math.ceil(baseCost * (1 - rate/100));
                 realCost += discountedCost;
             }
         }
@@ -258,7 +269,6 @@ const app = (() => {
     const toggleAdmin = () => {
         const p = $('admin-panel');
         if(p.style.display === 'none') {
-            // パスワード確認を削除してすぐに開く
             p.style.display = 'block';
             $('admin-costs').value = DATA.COSTS.join(', ');
             $('admin-virus').value = DATA.VIRUS.join(', ');
@@ -272,6 +282,7 @@ const app = (() => {
             const strCost = $('admin-costs').value;
             const strVirus = $('admin-virus').value;
 
+            // 数字以外が入っていても0として扱う安全処理
             const newCosts = strCost.split(',').map(s => parseInt(s.trim()) || 0);
             const newVirus = strVirus.split(',').map(s => parseInt(s.trim()) || 0);
 
