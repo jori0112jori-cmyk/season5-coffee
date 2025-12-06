@@ -100,23 +100,19 @@ const app = (() => {
         for(let i=0; i<=20; i+=0.5) dSel.add(new Option(i.toFixed(1)+'%', i));
     };
 
-    // ★変更: 研究所(lab-)の場合のみ、ウイルス耐性を表示する
+    // ★変更: 工場や週間配達を含むすべての項目でウイルス耐性を表示する
     const fillSel = (id, min, max) => {
         const s = $(id);
         if(!s) return;
         s.innerHTML = '';
         if(min===0) s.add(new Option('-', 0));
 
-        // IDが 'lab-' で始まるかチェック
-        const isLab = id.startsWith('lab-');
-
         for(let i=Math.max(1, min); i<=max; i++) {
             let label = 'Lv.' + i;
-            if(isLab) {
-                // ウイルス数値を整形して追加 例: Lv.50 [12,000]
-                const v = DATA.VIRUS[i] || 0;
-                label += ` [${v.toLocaleString()}]`;
-            }
+            // 全てのプルダウンで数値を付記
+            const v = DATA.VIRUS[i] || 0;
+            label += ` [${v.toLocaleString()}]`;
+            
             s.add(new Option(label, i));
         }
     };
@@ -124,7 +120,7 @@ const app = (() => {
     const calc = () => {
         let hourlyProd = 0;
         for(let i=1; i<=4; i++) {
-            const lv = parseInt($(`f${i}`)?.value || 0);
+            const lv = parseInt($(`f${i+1}`)?.value || 0);
             const val = lv * CONFIG.PROD_BASE;
             $(`fv${i}`).innerHTML = fmtKM(val, true);
             hourlyProd += val;
@@ -289,6 +285,7 @@ const app = (() => {
             const strCost = $('admin-costs').value;
             const strVirus = $('admin-virus').value;
 
+            // 数字以外が入っていても0として扱う安全処理
             const newCosts = strCost.split(',').map(s => parseInt(s.trim()) || 0);
             const newVirus = strVirus.split(',').map(s => parseInt(s.trim()) || 0);
 
