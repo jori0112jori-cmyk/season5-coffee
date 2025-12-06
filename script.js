@@ -1,17 +1,15 @@
-
 /* --- Static Data --- */
 // 1. デフォルトデータの定義
 const DEFAULT_DATA = {
-    COSTS: [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 260100, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1206300, 1326900, 1333600, 1340200, 1346900],
+    COSTS: [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 260100, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1015300, 1025500, 1035700, 1046100, 1056500, 1067100, 1077800, 1088600, 1099400, 1110400, 1121500, 1132800, 1144100, 1155500, 1167000, 1178700, 1190500, 1202400, 1214500],
     VIRUS: [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8400, 8550, 8700, 8850, 9000, 9200, 9400, 9600, 9900, 10200, 10500, 10700, 10900, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 13300,18000, 23000, 28000],
     TEXT: {
         ja: { title: "コーヒー生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "最大生産時間（24ｈ）", r_cost: "必要量", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "データ保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "必要量確保予測", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
-        en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting (Caffeine Inst.)", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Required Amount", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Data Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Prediction of required amount", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
+        en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting (Caffeine Inst.)", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Total Cost", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Data Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Prediction of required amount", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
     }
 };
 
-// 2. 稼働用変数の初期化（安全のため、まずはデフォルト値をコピーして入れておく）
-// これにより読み込みエラーがあっても画面が真っ白になりません
+// 2. 稼働用変数の初期化
 let DATA = {
     COSTS: [...DEFAULT_DATA.COSTS],
     VIRUS: [...DEFAULT_DATA.VIRUS],
@@ -39,10 +37,8 @@ const app = (() => {
     
     const init = () => {
         try {
-            // ここで保存された管理者データがあれば上書きする
             loadMasterData();
 
-            // データ数に合わせてタイトル更新
             const maxDataLv = DATA.COSTS.findLastIndex(n => n > 0);
             const subTitle = document.querySelector('.subtitle');
             if(subTitle) subTitle.textContent = `LastWar S5 Coffee Calc (Data: Lv.${maxDataLv})`;
@@ -75,10 +71,8 @@ const app = (() => {
                 console.log("Custom data loaded");
             } catch(e) {
                 console.error("Data Load Error", e);
-                // エラー時はデフォルトのまま進むので何もしない
             }
         }
-        // 安全策：長さ確保
         while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
         while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
     };
@@ -106,12 +100,25 @@ const app = (() => {
         for(let i=0; i<=20; i+=0.5) dSel.add(new Option(i.toFixed(1)+'%', i));
     };
 
+    // ★変更: 研究所(lab-)の場合のみ、ウイルス耐性を表示する
     const fillSel = (id, min, max) => {
         const s = $(id);
         if(!s) return;
         s.innerHTML = '';
         if(min===0) s.add(new Option('-', 0));
-        for(let i=Math.max(1, min); i<=max; i++) s.add(new Option('Lv.'+i, i));
+
+        // IDが 'lab-' で始まるかチェック
+        const isLab = id.startsWith('lab-');
+
+        for(let i=Math.max(1, min); i<=max; i++) {
+            let label = 'Lv.' + i;
+            if(isLab) {
+                // ウイルス数値を整形して追加 例: Lv.50 [12,000]
+                const v = DATA.VIRUS[i] || 0;
+                label += ` [${v.toLocaleString()}]`;
+            }
+            s.add(new Option(label, i));
+        }
     };
 
     const calc = () => {
@@ -135,7 +142,7 @@ const app = (() => {
 
         if(cLv < tLv) {
             for(let i = cLv; i < tLv; i++) {
-                const baseCost = DATA.COSTS[i+1] || 0;
+                const baseCost = DATA.COSTS[i-1] || 0;
                 const discountedCost = Math.ceil(baseCost * (1 - rate/100));
                 realCost += discountedCost;
             }
@@ -282,7 +289,6 @@ const app = (() => {
             const strCost = $('admin-costs').value;
             const strVirus = $('admin-virus').value;
 
-            // 数字以外が入っていても0として扱う安全処理
             const newCosts = strCost.split(',').map(s => parseInt(s.trim()) || 0);
             const newVirus = strVirus.split(',').map(s => parseInt(s.trim()) || 0);
 
@@ -307,4 +313,3 @@ const app = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', app.init);
-
