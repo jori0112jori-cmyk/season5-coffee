@@ -5,7 +5,7 @@ const DEFAULT_DATA = {
     VIRUS: [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8400, 8550, 8700, 8850, 9000, 9200, 9400, 9600, 9900, 10200, 10500, 10700, 10900, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 13300,18000, 23000, 28000],
     TEXT: {
         ja: { title: "コーヒー生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "最大生産時間（24ｈ）", r_cost: "必要量", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "データ保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "必要量確保予測", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
-        en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting (Caffeine Inst.)", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Total Cost", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Data Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Prediction of required amount", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
+        en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting (Caffeine Inst.)", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Required Amount", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Data Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Prediction of required amount", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
     }
 };
 
@@ -83,10 +83,10 @@ const app = (() => {
             fArea.innerHTML = '';
             for(let i=1; i<=4; i++) {
                 const div = document.createElement('div');
+                // ★修正: 下部の数値表示(div#fv${i})を削除
                 div.innerHTML = `
                     <label><span data-t="f_prefix"></span> ${roman(i)}</label>
                     <select id="f${i}" onchange="app.calc()"></select>
-                    <div id="fv${i}" class="sub-val">0</div>
                 `;
                 fArea.appendChild(div);
                 fillSel(`f${i}`, 0, 30);
@@ -114,13 +114,19 @@ const app = (() => {
             let label = 'Lv.' + i;
             
             if(isLab) {
-                // 研究所：ウイルス耐性を表示
+                // 研究所：ウイルス耐性を表示 (例: [1,200])
                 const v = DATA.VIRUS[i] || 0;
                 label += ` [${v.toLocaleString()}]`;
             } else {
-                // 工場・週間配達：生産量(/h)を表示
+                // ★修正: 工場・週間配達：生産量(/h)をK単位で表示 (例: [7.20K/h])
                 const prod = i * CONFIG.PROD_BASE;
-                label += ` [${prod.toLocaleString()}/h]`;
+                let prodStr = "";
+                if(prod >= 1000) {
+                    prodStr = (prod / 1000).toFixed(2) + 'K';
+                } else {
+                    prodStr = prod;
+                }
+                label += ` [${prodStr}/h]`;
             }
             
             s.add(new Option(label, i));
@@ -132,7 +138,7 @@ const app = (() => {
         for(let i=1; i<=4; i++) {
             const lv = parseInt($(`f${i}`)?.value || 0);
             const val = lv * CONFIG.PROD_BASE;
-            $(`fv${i}`).innerHTML = fmtKM(val, true);
+            // ★修正: ここでの個別表示更新(innerHTML)は削除
             hourlyProd += val;
         }
         hourlyProd += (parseInt($('weekly-lv')?.value || 0) * CONFIG.PROD_BASE);
