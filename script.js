@@ -100,18 +100,28 @@ const app = (() => {
         for(let i=0; i<=20; i+=0.5) dSel.add(new Option(i.toFixed(1)+'%', i));
     };
 
-    // ★変更: 工場や週間配達を含むすべての項目でウイルス耐性を表示する
+    // ★変更: 項目IDに応じて表示する数値を切り替え
     const fillSel = (id, min, max) => {
         const s = $(id);
         if(!s) return;
         s.innerHTML = '';
         if(min===0) s.add(new Option('-', 0));
 
+        // IDが 'lab-' で始まるなら研究所(ウイルス)、それ以外は工場(生産量)
+        const isLab = id.startsWith('lab-');
+
         for(let i=Math.max(1, min); i<=max; i++) {
             let label = 'Lv.' + i;
-            // 全てのプルダウンで数値を付記
-            const v = DATA.VIRUS[i] || 0;
-            label += ` [${v.toLocaleString()}]`;
+            
+            if(isLab) {
+                // 研究所：ウイルス耐性を表示
+                const v = DATA.VIRUS[i] || 0;
+                label += ` [${v.toLocaleString()}]`;
+            } else {
+                // 工場・週間配達：生産量(/h)を表示
+                const prod = i * CONFIG.PROD_BASE;
+                label += ` [${prod.toLocaleString()}/h]`;
+            }
             
             s.add(new Option(label, i));
         }
@@ -120,7 +130,7 @@ const app = (() => {
     const calc = () => {
         let hourlyProd = 0;
         for(let i=1; i<=4; i++) {
-            const lv = parseInt($(`f${i+1}`)?.value || 0);
+            const lv = parseInt($(`f${i}`)?.value || 0);
             const val = lv * CONFIG.PROD_BASE;
             $(`fv${i}`).innerHTML = fmtKM(val, true);
             hourlyProd += val;
@@ -138,7 +148,7 @@ const app = (() => {
 
         if(cLv < tLv) {
             for(let i = cLv; i < tLv; i++) {
-                const baseCost = DATA.COSTS[i-1] || 0;
+                const baseCost = DATA.COSTS[i+1] || 0;
                 const discountedCost = Math.ceil(baseCost * (1 - rate/100));
                 realCost += discountedCost;
             }
