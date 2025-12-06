@@ -1,6 +1,7 @@
 /* --- Static Data --- */
 // 1. デフォルトデータの定義
 const DEFAULT_DATA = {
+    // 最新のコストデータを反映
     COSTS: [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 260100, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1206300, 1326900, 1333600, 1340200, 1346900],
     VIRUS: [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8400, 8550, 8700, 8850, 9000, 9200, 9400, 9600, 9900, 10200, 10500, 10700, 10900, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 13300,18000, 23000, 28000],
     TEXT: {
@@ -83,7 +84,6 @@ const app = (() => {
             fArea.innerHTML = '';
             for(let i=1; i<=4; i++) {
                 const div = document.createElement('div');
-                // ★修正: 下部の数値表示(div#fv${i})を削除
                 div.innerHTML = `
                     <label><span data-t="f_prefix"></span> ${roman(i)}</label>
                     <select id="f${i}" onchange="app.calc()"></select>
@@ -100,25 +100,21 @@ const app = (() => {
         for(let i=0; i<=20; i+=0.5) dSel.add(new Option(i.toFixed(1)+'%', i));
     };
 
-    // ★変更: 項目IDに応じて表示する数値を切り替え
     const fillSel = (id, min, max) => {
         const s = $(id);
         if(!s) return;
         s.innerHTML = '';
         if(min===0) s.add(new Option('-', 0));
 
-        // IDが 'lab-' で始まるなら研究所(ウイルス)、それ以外は工場(生産量)
         const isLab = id.startsWith('lab-');
 
         for(let i=Math.max(1, min); i<=max; i++) {
             let label = 'Lv.' + i;
             
             if(isLab) {
-                // 研究所：ウイルス耐性を表示 (例: [1,200])
                 const v = DATA.VIRUS[i] || 0;
                 label += ` [${v.toLocaleString()}]`;
             } else {
-                // ★修正: 工場・週間配達：生産量(/h)をK単位で表示 (例: [7.20K/h])
                 const prod = i * CONFIG.PROD_BASE;
                 let prodStr = "";
                 if(prod >= 1000) {
@@ -138,10 +134,12 @@ const app = (() => {
         for(let i=1; i<=4; i++) {
             const lv = parseInt($(`f${i}`)?.value || 0);
             const val = lv * CONFIG.PROD_BASE;
-            // ★修正: ここでの個別表示更新(innerHTML)は削除
             hourlyProd += val;
         }
-        hourlyProd += (parseInt($('weekly-lv')?.value || 0) * CONFIG.PROD_BASE);
+        
+        // 週間配達Lvを取得
+        const weeklyLv = parseInt($('weekly-lv')?.value || 0);
+        hourlyProd += (weeklyLv * CONFIG.PROD_BASE);
 
         $('total-prod').innerHTML = fmtKM(hourlyProd, true) + '/h';
         $('res-daily').innerHTML = fmtKM(hourlyProd * 24, true);
@@ -161,7 +159,13 @@ const app = (() => {
         }
         
         $('res-cost').innerHTML = fmtKM(realCost, true);
-        $('res-virus').textContent = `${fmt(DATA.VIRUS[cLv]||0)} → ${fmt(DATA.VIRUS[tLv]||0)}`;
+
+        // ★修正: 週間配達Lv >= 1 ならウイルス耐性に +250 して表示
+        const virusBonus = weeklyLv >= 1 ? 250 : 0;
+        const curVirus = (DATA.VIRUS[cLv] || 0) + virusBonus;
+        const tgtVirus = (DATA.VIRUS[tLv] || 0) + virusBonus;
+
+        $('res-virus').textContent = `${fmt(curVirus)} → ${fmt(tgtVirus)}`;
 
         const stock = parseStock($('stock')?.value || 0);
         const shortage = Math.max(0, realCost - stock);
