@@ -5,8 +5,54 @@ const DEFAULT_DATA = {
     COSTS: [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 260100, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1206300, 1326900, 1333600, 1340200, 1346900, 1353700, 1360400, 1367300, 1374100, 1381000, 1387900],
     VIRUS: [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8400, 8550, 8700, 8850, 9000, 9200, 9400, 9600, 9900, 10200, 10500, 10700, 10900, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 13300,18000, 23000, 28000],
     TEXT: {
-        ja: { title: "コーヒー生産計算機", h_prod: "生産設定", weekly: "週間配達", time: "基準時刻", h_status: "目標設定（カフェイン研究所）", cur_lv: "現在Lv", tgt_lv: "目標Lv", stock: "保有量", disc: "消費減少率(%)", h_res: "計算結果", r_daily: "最大生産時間(24h)", r_cost: "必要量", r_virus: "ウイルス耐性", r_short: "不足", btn_save: "データ保存", btn_reset: "リセット", btn_now: "現在", msg_ok: "達成済み", msg_wait: "必要量確保予測", msg_stop: "生産量 0", f_prefix: "コーヒー工場" },
-        en: { title: "Coffee Calc", h_prod: "Production", weekly: "Weekly", time: "Base Time", h_status: "Goal Setting (Caffeine Inst.)", cur_lv: "Current Lv", tgt_lv: "Target Lv", stock: "Stock", disc: "Resource Reduction(%)", h_res: "Result", r_daily: "Max Production Time(24h)", r_cost: "Required Amount", r_virus: "Virus Resistance", r_short: "Shortage", btn_save: "Data Save", btn_reset: "Reset", btn_now: "Now", msg_ok: "Completed", msg_wait: "Prediction of required amount", msg_stop: "No Prod", f_prefix: "Coffee Factory" }
+        ja: { 
+            title: "コーヒー生産計算機", 
+            h_prod: "生産設定", 
+            weekly: "週間配達", 
+            time: "基準時刻", 
+            h_status: "目標設定（カフェイン研究所）",
+            h_buff: "コーヒーバフ (ウイルス耐性)", // 追加
+            cur_lv: "現在Lv", 
+            tgt_lv: "目標Lv", 
+            stock: "保有量", 
+            disc: "消費減少率(%)", 
+            h_res: "計算結果", 
+            r_daily: "最大生産時間(24h)", 
+            r_cost: "必要量", 
+            r_virus: "ウイルス耐性", 
+            r_short: "不足", 
+            btn_save: "データ保存", 
+            btn_reset: "リセット", 
+            btn_now: "現在", 
+            msg_ok: "達成済み", 
+            msg_wait: "必要量確保予測", 
+            msg_stop: "生産量 0", 
+            f_prefix: "コーヒー工場" 
+        },
+        en: { 
+            title: "Coffee Calc", 
+            h_prod: "Production", 
+            weekly: "Weekly", 
+            time: "Base Time", 
+            h_status: "Goal Setting (Caffeine Inst.)",
+            h_buff: "Coffee Buff (Virus Res.)", // 追加
+            cur_lv: "Current Lv", 
+            tgt_lv: "Target Lv", 
+            stock: "Stock", 
+            disc: "Resource Reduction(%)", 
+            h_res: "Result", 
+            r_daily: "Max Production Time(24h)", 
+            r_cost: "Required Amount", 
+            r_virus: "Virus Resistance", 
+            r_short: "Shortage", 
+            btn_save: "Data Save", 
+            btn_reset: "Reset", 
+            btn_now: "Now", 
+            msg_ok: "Completed", 
+            msg_wait: "Prediction of required amount", 
+            msg_stop: "No Prod", 
+            f_prefix: "Coffee Factory" 
+        }
     }
 };
 
@@ -129,6 +175,20 @@ const app = (() => {
         }
     };
 
+    // ★新規追加: コーヒーバフの排他制御
+    const toggleBuff = (val) => {
+        const b250 = $('buff-250');
+        const b500 = $('buff-500');
+        
+        // 重複不可ロジック
+        if (val === 250 && b250.checked) {
+            b500.checked = false;
+        } else if (val === 500 && b500.checked) {
+            b250.checked = false;
+        }
+        calc();
+    };
+
     const calc = () => {
         let hourlyProd = 0;
         for(let i=1; i<=4; i++) {
@@ -160,10 +220,18 @@ const app = (() => {
         
         $('res-cost').innerHTML = fmtKM(realCost, true);
 
-        // ★修正: 週間配達Lv >= 1 ならウイルス耐性に +250 して表示
-        const virusBonus = weeklyLv >= 1 ? 250 : 0;
-        const curVirus = (DATA.VIRUS[cLv] || 0) + virusBonus;
-        const tgtVirus = (DATA.VIRUS[tLv] || 0) + virusBonus;
+        // ★修正: 週間配達ボーナス + コーヒーバフ
+        const weeklyBonus = weeklyLv >= 1 ? 250 : 0;
+        
+        // コーヒーバフ値取得
+        let buffVal = 0;
+        if($('buff-250')?.checked) buffVal = 250;
+        if($('buff-500')?.checked) buffVal = 500;
+
+        const totalBonus = weeklyBonus + buffVal;
+
+        const curVirus = (DATA.VIRUS[cLv] || 0) + totalBonus;
+        const tgtVirus = (DATA.VIRUS[tLv] || 0) + totalBonus;
 
         $('res-virus').textContent = `${fmt(curVirus)} → ${fmt(tgtVirus)}`;
 
@@ -236,13 +304,19 @@ const app = (() => {
     };
 
     const save = () => {
+        // バフ設定も保存
+        let bf = 0;
+        if($('buff-250').checked) bf = 250;
+        if($('buff-500').checked) bf = 500;
+
         const data = {
             fs: [1,2,3,4].map(i => $(`f${i}`).value),
             wk: $('weekly-lv').value,
             lc: $('lab-cur').value,
             lt: $('lab-tgt').value,
             st: $('stock').value,
-            ds: $('discount').value
+            ds: $('discount').value,
+            bf: bf // 追加
         };
         localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify(data));
         alert(lang === 'ja' ? '保存しました' : 'Saved');
@@ -258,6 +332,11 @@ const app = (() => {
         if(d.lt) $('lab-tgt').value = d.lt;
         if(d.st) $('stock').value = d.st;
         if(d.ds) $('discount').value = d.ds;
+        // バフ設定復元
+        if(d.bf) {
+            if(d.bf === 250 && $('buff-250')) $('buff-250').checked = true;
+            if(d.bf === 500 && $('buff-500')) $('buff-500').checked = true;
+        }
     };
 
     const reset = () => {
@@ -305,7 +384,6 @@ const app = (() => {
             const strCost = $('admin-costs').value;
             const strVirus = $('admin-virus').value;
 
-            // 数字以外が入っていても0として扱う安全処理
             const newCosts = strCost.split(',').map(s => parseInt(s.trim()) || 0);
             const newVirus = strVirus.split(',').map(s => parseInt(s.trim()) || 0);
 
@@ -326,7 +404,7 @@ const app = (() => {
         }
     };
     
-    return { init, calc, save, reset, setLang, setNow, onCurChange, toggleAdmin, saveAdmin, resetAdmin };
+    return { init, calc, save, reset, setLang, setNow, onCurChange, toggleAdmin, saveAdmin, resetAdmin, toggleBuff };
 })();
 
 document.addEventListener('DOMContentLoaded', app.init);
