@@ -91,6 +91,12 @@ select:focus, input:focus {
 
 /* 既存のinput width:100%指定をチェックボックスだけ上書き解除 */
 .checkbox-group input[type="checkbox"] {
+    /* ▼▼▼ 修正・追加部分 ▼▼▼ */
+    -webkit-appearance: checkbox; /* iOS/Safariでチェックボックスを表示するために必須 */
+    appearance: auto;             /* 標準の見た目に戻す */
+    background: transparent;      /* グローバルなinput背景色を無効化 */
+    border: none;                 /* グローバルなinput枠線を無効化 */
+    /* ▲▲▲ 修正・追加部分 ▲▲▲ */
     width: auto; 
     margin-right: 10px;
     transform: scale(1.3);
