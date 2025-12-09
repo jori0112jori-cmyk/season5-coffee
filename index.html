@@ -44,7 +44,7 @@
     </div>
 
     <div class="card">
-        <h2 data-t="h_status">目標と在庫</h2>
+        <h2 data-t="h_status">目標設定（カフェイン研究所）</h2>
         <div class="grid cols-2">
             <div>
                 <label data-t="cur_lv">現在 Lv</label>
@@ -64,6 +64,20 @@
                 <label data-t="disc">割引率 (%)</label>
                 <select id="discount" onchange="app.calc()"></select>
             </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 data-t="h_buff">コーヒーバフ (ウイルス耐性)</h2>
+        <div class="grid cols-2 checkbox-group">
+            <label>
+                <input type="checkbox" id="buff-250" onchange="app.toggleBuff(250)">
+                <span>+250</span>
+            </label>
+            <label>
+                <input type="checkbox" id="buff-500" onchange="app.toggleBuff(500)">
+                <span>+500</span>
+            </label>
         </div>
     </div>
 
@@ -131,26 +145,3 @@
 <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
