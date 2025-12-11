@@ -162,7 +162,8 @@ select:focus, input:focus {
     white-space: nowrap; transition: transform 0.1s;
 }
 .btn-now:active { transform: translateY(2px); }
-
+box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
 /* --- Language Switcher --- */
 .lang-switch { display: flex; gap: 12px; }
 .flag-icon { 
