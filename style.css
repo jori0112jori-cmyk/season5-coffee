@@ -63,7 +63,7 @@ label {
     margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
 }
 
-/* 【重要修正】チェックボックス以外(text, number等)にスタイルを適用 */
+/* チェックボックス以外のinputとselect */
 select, input:not([type="checkbox"]) {
     width: 100%; padding: 12px;
     border: 1px solid var(--c-border); border-radius: 8px;
@@ -79,12 +79,28 @@ select:focus, input:not([type="checkbox"]):focus {
 
 /* チェックボックス専用スタイル */
 input[type="checkbox"] {
-    appearance: auto;         /* ブラウザ標準のチェックボックスを表示 */
-    -webkit-appearance: checkbox; /* Safari用 */
+    appearance: auto;           
+    -webkit-appearance: auto;   
+    accent-color: var(--c-accent);
     width: 20px;
     height: 20px;
     cursor: pointer;
-    accent-color: var(--c-primary); /* チェック時の色をテーマカラーに */
+    vertical-align: middle;
+}
+
+/* 保有量入力欄 (#stock) */
+#stock {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    height: 44px;
+    padding: 0 10px;
+}
+#stock::placeholder {
+    font-weight: normal;
+    font-size: 1rem;
+    opacity: 0.6;
 }
 
 /* --- Grid Layouts --- */
@@ -186,24 +202,38 @@ input[type="checkbox"] {
 .step-display {
     flex: 1;
     display: flex;
-    align-items: center;
+    /* 【変更点】baselineからcenterに変更し、垂直方向のズレを修正 */
+    align-items: center; 
     justify-content: center;
     background: #FFF;
     border: 1px solid var(--c-border);
     border-radius: 8px;
     height: 44px;
-    padding: 0 10px;
+    padding: 0 5px;
     font-family: 'Roboto Mono', monospace;
-    font-size: 1.2rem;
-    cursor: default; /* クリック不可 */
+    font-size: 1.1rem;
+    cursor: default;
     user-select: none;
+    white-space: nowrap;
 }
 
-/* 数値の色分け */
+/* 数値表示用 */
+.sub-label {
+    font-size: 0.8rem;
+    color: #8D6E63;
+    margin-right: 4px;
+    font-weight: bold;
+    /* ラベルの位置微調整（必要なら） */
+    position: relative;
+    top: 1px; 
+}
+.sub-sep {
+    display: inline-block;
+    width: 12px; /* 間隔 */
+}
+
 .val-lv { font-weight: bold; color: #3E2723; }
-.val-sep { color: #BBB; margin: 0 6px; font-weight: normal; }
 .val-res { font-weight: bold; color: #007AFF; }
-/* バフ適用時の演出（緑色） */
 .val-res.buffed { color: #2E7D32; }
 
 /* バフ選択 (トグルボタン) */
@@ -215,11 +245,11 @@ input[type="checkbox"] {
 
 .buff-chip {
     flex: 1;
-    min-width: 140px; /* スマホで2列になる程度 */
+    min-width: 140px; 
     padding: 12px 10px;
     background: #FFF;
     border: 1px solid var(--c-border);
-    border-radius: 30px; /* カプセル型 */
+    border-radius: 30px; 
     color: var(--c-text);
     font-weight: bold;
     font-size: 0.9rem;
@@ -232,15 +262,14 @@ input[type="checkbox"] {
     align-items: center;
 }
 
-/* ONの状態 */
 .buff-chip.active {
-    background: #007AFF; /* 青 */
+    background: #007AFF; 
     border-color: #007AFF;
     color: #FFF;
     box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
 }
 
-/* --- 非活性化状態（週間配達用） --- */
+/* --- 非活性化状態 --- */
 .disabled-item {
     opacity: 0.4;
     pointer-events: none;
