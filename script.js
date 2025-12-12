@@ -275,9 +275,9 @@ const app = (() => {
         const tLv = parseInt($('lab-tgt')?.value || 0);
         const rate = parseFloat($('discount')?.value || 0);
 
-        // 【修正】割引計算を整数ベースに変更（誤差防止）
+        // 【誤差対策】割引計算を整数ベースに変更
         // rate(%) を10倍して整数化 (2.5% -> 25)
-        // 100% = 1000 として計算
+        // 100% = 1000 として計算することで浮動小数点の誤差を排除
         const rateInt = Math.round(rate * 10);
         const factor = 1000 - rateInt;
 
@@ -286,6 +286,7 @@ const app = (() => {
             for(let i = cLv; i < tLv; i++) {
                 const baseCost = DATA.COSTS[i+1] || 0;
                 // 小数を使わず計算: ceil((Cost * (1000 - rate*10)) / 1000)
+                // この方法により、「理論上の割引適用後の最大整数コスト」を算出します
                 const discountedCost = Math.ceil((baseCost * factor) / 1000);
                 realCost += discountedCost;
             }
@@ -294,7 +295,6 @@ const app = (() => {
         $('res-cost').innerHTML = fmtKM(realCost, true);
 
         // ウイルス耐性計算
-        // 週間配達がON かつ Lv1以上なら +250
         const wBonus = (weeklyActive && weeklyLv >= 1) ? 250 : 0;
         
         const totalBonus = wBonus + activeBuff;
@@ -332,7 +332,7 @@ const app = (() => {
         d.setHours(nowVal[0]||0, nowVal[1]||0, 0, 0);
         d.setMinutes(d.getMinutes() + (hoursNeeded * 60));
 
-        // 時刻表示：d.getHours() はそのまま（9時なら"9"）、分は0埋め（5分なら"05"）
+        // 時刻表示：時間の0埋めなし(9:05)、分は0埋めあり(05)
         setMsg(elMsg, elTime, "msg_wait", `${d.getHours()}:${pz(d.getMinutes())}`, "#BF360C");
         elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
     };
