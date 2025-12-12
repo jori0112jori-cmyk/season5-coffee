@@ -128,8 +128,6 @@ const app = (() => {
         // ステッパー用の隠しセレクトボックス（値保持用）
         fillSel('lab-cur', 0, CONFIG.MAX_LV);
         fillSel('lab-tgt', 1, CONFIG.MAX_LV);
-        
-        // 割引率のプルダウン生成は削除しました
     };
 
     const fillSel = (id, min, max) => {
@@ -166,7 +164,7 @@ const app = (() => {
             if(val < 0) val = 0;
             if(val > 20) val = 20;
 
-            // 浮動小数点の誤差対策 (例: 0.500000001を防ぐ)
+            // 浮動小数点の誤差対策
             val = Math.round(val * 10) / 10;
 
             el.value = val;
@@ -175,7 +173,7 @@ const app = (() => {
             return;
         }
 
-        // --- 以下、Lv (cur, tgt) の場合 ---
+        // --- Lv (cur, tgt) の場合 ---
         const id = `lab-${type}`; // 隠し要素のID
         const el = $(id);
         if(!el) return;
@@ -187,12 +185,23 @@ const app = (() => {
         if(val < 0) val = 0;
         if(val > CONFIG.MAX_LV) val = CONFIG.MAX_LV;
         
-        // 値を更新
         el.value = val;
         
-        // Lv変更時のチェックと表示更新
         if(type === 'cur') onCurChange();
         else calc();
+    };
+
+    // --- 週間配達の切替 ---
+    const toggleWeekly = () => {
+        const isActive = $('weekly-active').checked;
+        const sel = $('weekly-lv');
+        
+        if (isActive) {
+            sel.classList.remove('disabled-item');
+        } else {
+            sel.classList.add('disabled-item');
+        }
+        calc();
     };
 
     // --- バフボタン操作 ---
@@ -216,28 +225,19 @@ const app = (() => {
         calc();
     };
 
-    // 表示更新 (DOM操作)
     const updateSteppers = () => {
-        // 現在Lvの更新
         const curLv = parseInt($('lab-cur').value || 0);
         const curBase = DATA.VIRUS[curLv] || 0;
         
         if($('disp-cur-lv')) $('disp-cur-lv').textContent = curLv;
-        if($('disp-cur-res')) {
-            $('disp-cur-res').textContent = curBase.toLocaleString();
-        }
+        if($('disp-cur-res')) $('disp-cur-res').textContent = curBase.toLocaleString();
 
-        // 目標Lvの更新
         const tgtLv = parseInt($('lab-tgt').value || 0);
         const tgtBase = DATA.VIRUS[tgtLv] || 0;
 
         if($('disp-tgt-lv')) $('disp-tgt-lv').textContent = tgtLv;
-        if($('disp-tgt-res')) {
-            $('disp-tgt-res').textContent = tgtBase.toLocaleString();
-        }
+        if($('disp-tgt-res')) $('disp-tgt-res').textContent = tgtBase.toLocaleString();
         
-        // 割引率の表示更新は step 関数または loadData で行うが、
-        // 念のためここでも値がズレないように設定しておく
         const discVal = parseFloat($('discount').value || 0);
         if($('disp-disc')) $('disp-disc').textContent = discVal.toFixed(1);
     };
@@ -247,13 +247,18 @@ const app = (() => {
         updateSteppers();
 
         let hourlyProd = 0;
+        // 工場
         for(let i=1; i<=4; i++) {
             const lv = parseInt($(`f${i}`)?.value || 0);
             hourlyProd += (lv * CONFIG.PROD_BASE);
         }
         
+        // 週間配達（チェックがある場合のみ計算）
+        const weeklyActive = $('weekly-active').checked;
         const weeklyLv = parseInt($('weekly-lv')?.value || 0);
-        hourlyProd += (weeklyLv * CONFIG.PROD_BASE);
+        if (weeklyActive) {
+            hourlyProd += (weeklyLv * CONFIG.PROD_BASE);
+        }
 
         $('total-prod').innerHTML = fmtKM(hourlyProd, true) + '/h';
         $('res-daily').innerHTML = fmtKM(hourlyProd * 24, true);
@@ -273,8 +278,10 @@ const app = (() => {
         
         $('res-cost').innerHTML = fmtKM(realCost, true);
 
-        // バフ込みの計算結果はここで処理 (結果カード用)
-        const wBonus = weeklyLv >= 1 ? 250 : 0;
+        // ウイルス耐性計算
+        // 週間配達がON かつ Lv1以上なら +250
+        const wBonus = (weeklyActive && weeklyLv >= 1) ? 250 : 0;
+        
         const totalBonus = wBonus + activeBuff;
         const curVirus = (DATA.VIRUS[cLv] || 0) + totalBonus;
         const tgtVirus = (DATA.VIRUS[tLv] || 0) + totalBonus;
@@ -347,6 +354,7 @@ const app = (() => {
         const data = {
             fs: [1,2,3,4].map(i => $(`f${i}`).value),
             wk: $('weekly-lv').value,
+            wa: $('weekly-active').checked, // 週間配達のON/OFF保存
             lc: $('lab-cur').value,
             lt: $('lab-tgt').value,
             st: $('stock').value,
@@ -363,10 +371,18 @@ const app = (() => {
         const d = JSON.parse(raw);
         if(d.fs) d.fs.forEach((v,i) => { if($(`f${i+1}`)) $(`f${i+1}`).value = v; });
         if(d.wk) $('weekly-lv').value = d.wk;
+        
+        // 週間配達の状態復元
+        if(d.wa !== undefined) {
+            $('weekly-active').checked = d.wa;
+        } else {
+            $('weekly-active').checked = true; // デフォルトON
+        }
+        toggleWeekly();
+
         if(d.lc) $('lab-cur').value = d.lc;
         if(d.lt) $('lab-tgt').value = d.lt;
         if(d.st) $('stock').value = d.st;
-        // 割引率の読み込みと表示更新
         if(d.ds) {
             $('discount').value = d.ds;
             if($('disp-disc')) $('disp-disc').textContent = parseFloat(d.ds).toFixed(1);
@@ -436,7 +452,7 @@ const app = (() => {
     return { 
         init, calc, save, reset, setLang, setNow, onCurChange, 
         toggleAdmin, saveAdmin, resetAdmin, 
-        toggleBuffBtn, step
+        toggleBuffBtn, step, toggleWeekly
     };
 })();
 
