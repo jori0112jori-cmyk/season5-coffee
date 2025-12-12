@@ -22,7 +22,7 @@ const DEFAULT_DATA = {
             r_daily: "最大生産時間(24h)", 
             r_cost: "必要量", 
             r_virus: "合計ウイルス耐性", 
-            r_short: "不足", 
+            r_short: "不足 (安全策:切り上げ)", 
             btn_save: "データ保存", 
             btn_reset: "リセット", 
             btn_now: "現在", 
@@ -50,7 +50,7 @@ const DEFAULT_DATA = {
             r_daily: "Max Production Time(24h)", 
             r_cost: "Required Amount", 
             r_virus: "Total Virus Resistance", 
-            r_short: "Shortage", 
+            r_short: "Shortage (Rounded Up)", 
             btn_save: "Data Save", 
             btn_reset: "Reset", 
             btn_now: "Now", 
@@ -132,8 +132,6 @@ const app = (() => {
             }
         }
         fillSel('weekly-lv', 0, 30);
-        
-        // ステッパー用の隠しセレクトボックス（値保持用）
         fillSel('lab-cur', 0, CONFIG.MAX_LV);
         fillSel('lab-tgt', 1, CONFIG.MAX_LV);
     };
@@ -159,51 +157,36 @@ const app = (() => {
         }
     };
 
-    // --- ステッパー操作 (ボタンのみ) ---
     const step = (type, delta) => {
-        
-        // --- 割引率 (disc) の場合 ---
         if(type === 'disc') {
-            const el = $('discount'); // hidden input
+            const el = $('discount'); 
             let val = parseFloat(el.value || 0);
             val += delta;
-            
-            // 範囲制限 (0% ~ 20% と仮定)
             if(val < 0) val = 0;
             if(val > 20) val = 20;
-
-            // 浮動小数点の誤差対策
             val = Math.round(val * 10) / 10;
-
             el.value = val;
-            $('disp-disc').textContent = val.toFixed(1); // 表示更新
+            $('disp-disc').textContent = val.toFixed(1);
             calc();
             return;
         }
 
-        // --- Lv (cur, tgt) の場合 ---
-        const id = `lab-${type}`; // 隠し要素のID
+        const id = `lab-${type}`;
         const el = $(id);
         if(!el) return;
-
         let val = parseInt(el.value || 0);
         val += delta;
-        
-        // 範囲制限
         if(val < 0) val = 0;
         if(val > CONFIG.MAX_LV) val = CONFIG.MAX_LV;
-        
         el.value = val;
         
         if(type === 'cur') onCurChange();
         else calc();
     };
 
-    // --- 週間配達の切替 ---
     const toggleWeekly = () => {
         const isActive = $('weekly-active').checked;
         const sel = $('weekly-lv');
-        
         if (isActive) {
             sel.classList.remove('disabled-item');
         } else {
@@ -212,7 +195,6 @@ const app = (() => {
         calc();
     };
 
-    // --- バフボタン操作 ---
     const toggleBuffBtn = (val) => {
         const btn250 = $('btn-buff-250');
         const btn500 = $('btn-buff-500');
@@ -236,13 +218,11 @@ const app = (() => {
     const updateSteppers = () => {
         const curLv = parseInt($('lab-cur').value || 0);
         const curBase = DATA.VIRUS[curLv] || 0;
-        
         if($('disp-cur-lv')) $('disp-cur-lv').textContent = curLv;
         if($('disp-cur-res')) $('disp-cur-res').textContent = curBase.toLocaleString();
 
         const tgtLv = parseInt($('lab-tgt').value || 0);
         const tgtBase = DATA.VIRUS[tgtLv] || 0;
-
         if($('disp-tgt-lv')) $('disp-tgt-lv').textContent = tgtLv;
         if($('disp-tgt-res')) $('disp-tgt-res').textContent = tgtBase.toLocaleString();
         
@@ -255,13 +235,11 @@ const app = (() => {
         updateSteppers();
 
         let hourlyProd = 0;
-        // 工場
         for(let i=1; i<=4; i++) {
             const lv = parseInt($(`f${i}`)?.value || 0);
             hourlyProd += (lv * CONFIG.PROD_BASE);
         }
         
-        // 週間配達（チェックがある場合のみ計算）
         const weeklyActive = $('weekly-active').checked;
         const weeklyLv = parseInt($('weekly-lv')?.value || 0);
         if (weeklyActive) {
@@ -275,9 +253,7 @@ const app = (() => {
         const tLv = parseInt($('lab-tgt')?.value || 0);
         const rate = parseFloat($('discount')?.value || 0);
 
-        // 【誤差対策】割引計算を整数ベースに変更
-        // rate(%) を10倍して整数化 (2.5% -> 25)
-        // 100% = 1000 として計算することで浮動小数点の誤差を排除
+        // 割引計算 (整数ベース)
         const rateInt = Math.round(rate * 10);
         const factor = 1000 - rateInt;
 
@@ -285,29 +261,35 @@ const app = (() => {
         if(cLv < tLv) {
             for(let i = cLv; i < tLv; i++) {
                 const baseCost = DATA.COSTS[i+1] || 0;
-                // 小数を使わず計算: ceil((Cost * (1000 - rate*10)) / 1000)
-                // この方法により、「理論上の割引適用後の最大整数コスト」を算出します
                 const discountedCost = Math.ceil((baseCost * factor) / 1000);
                 realCost += discountedCost;
             }
         }
         
-        $('res-cost').innerHTML = fmtKM(realCost, true);
+        // 必要総数: 正確な数値(fmt)で表示
+        $('res-cost').innerHTML = fmt(realCost);
 
-        // ウイルス耐性計算
         const wBonus = (weeklyActive && weeklyLv >= 1) ? 250 : 0;
-        
         const totalBonus = wBonus + activeBuff;
         const curVirus = (DATA.VIRUS[cLv] || 0) + totalBonus;
         const tgtVirus = (DATA.VIRUS[tLv] || 0) + totalBonus;
-
         $('res-virus').textContent = `${fmt(curVirus)} → ${fmt(tgtVirus)}`;
 
         const stock = parseStock($('stock')?.value || 0);
-        const shortage = Math.max(0, realCost - stock);
-        $('res-short').innerHTML = fmtKM(shortage, true);
+        let shortage = Math.max(0, realCost - stock);
+        
+        // 【修正】不足分の丸め処理 (安全策)
+        // 1000で割って切り上げ、1000を掛ける (例: 401,480 -> 402,000)
+        let safeShortage = 0;
+        if (shortage > 0) {
+            safeShortage = Math.ceil(shortage / 1000) * 1000;
+        }
 
-        updateStatus(shortage, hourlyProd);
+        // 不足表示: K/M表記 (fmtKM) を使用
+        $('res-short').innerHTML = fmtKM(safeShortage, true);
+
+        // 時間計算は「安全策で丸めた不足分」を元に行う
+        updateStatus(safeShortage, hourlyProd);
     };
 
     const updateStatus = (shortage, hourlyProd) => {
@@ -332,7 +314,6 @@ const app = (() => {
         d.setHours(nowVal[0]||0, nowVal[1]||0, 0, 0);
         d.setMinutes(d.getMinutes() + (hoursNeeded * 60));
 
-        // 時刻表示：時間の0埋めなし(9:05)、分は0埋めあり(05)
         setMsg(elMsg, elTime, "msg_wait", `${d.getHours()}:${pz(d.getMinutes())}`, "#BF360C");
         elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
     };
@@ -345,6 +326,15 @@ const app = (() => {
     };
     const fmt = n => n.toLocaleString();
     const pz = n => String(n).padStart(2, '0');
+    
+    // 【修正】K,M単位のフォーマット関数
+    // parseFloat(...) を通すことで "402.00" -> 402 になり、不要な小数を削除
+    const fmtKM = (n, detailed=false) => {
+        if(n >= 1000000) return parseFloat((n/1000000).toFixed(2)) + '<span class="unit">M</span>';
+        if(n >= 1000) return parseFloat((n/1000).toFixed(2)) + '<span class="unit">K</span>';
+        return fmt(n);
+    };
+
     const parseStock = v => {
         if(!v) return 0;
         let s = v.toString().toLowerCase().replace(/,/g,'');
@@ -353,14 +343,9 @@ const app = (() => {
         else if(s.endsWith('m')) { m=1000000; s=s.slice(0,-1); }
         return Math.floor((parseFloat(s)||0) * m); 
     };
-    const fmtKM = (n, detailed=false) => {
-        if(n >= 1000000) return (n/1000000).toFixed(2) + '<span class="unit">M</span>';
-        if(n >= 1000) return (n/1000).toFixed(2) + '<span class="unit">K</span>';
-        return fmt(n);
-    };
+    
     const setNow = () => {
         const d = new Date();
-        // input type="time" は HH:MM 形式（0埋め）が必須
         $('now-time').value = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
         const elDate = $('now-date');
         if(elDate) elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
@@ -371,7 +356,7 @@ const app = (() => {
         const data = {
             fs: [1,2,3,4].map(i => $(`f${i}`).value),
             wk: $('weekly-lv').value,
-            wa: $('weekly-active').checked, // 週間配達のON/OFF保存
+            wa: $('weekly-active').checked,
             lc: $('lab-cur').value,
             lt: $('lab-tgt').value,
             st: $('stock').value,
@@ -388,12 +373,10 @@ const app = (() => {
         const d = JSON.parse(raw);
         if(d.fs) d.fs.forEach((v,i) => { if($(`f${i+1}`)) $(`f${i+1}`).value = v; });
         if(d.wk) $('weekly-lv').value = d.wk;
-        
-        // 週間配達の状態復元
         if(d.wa !== undefined) {
             $('weekly-active').checked = d.wa;
         } else {
-            $('weekly-active').checked = true; // デフォルトON
+            $('weekly-active').checked = true;
         }
         toggleWeekly();
 
