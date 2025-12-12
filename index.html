@@ -83,7 +83,15 @@
             </div>
             <div>
                 <label data-t="disc">割引率 (%)</label>
-                <select id="discount" onchange="app.calc()"></select>
+                <div class="stepper-ctrl">
+                    <button class="step-btn" onclick="app.step('disc', -0.5)">－</button>
+                    <div class="step-display">
+                        <span id="disp-disc" class="val-lv">0.0</span>
+                        <span class="val-sep">%</span>
+                    </div>
+                    <button class="step-btn" onclick="app.step('disc', 0.5)">＋</button>
+                </div>
+                <input type="hidden" id="discount" value="0">
             </div>
         </div>
     </div>
