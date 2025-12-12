@@ -45,15 +45,36 @@
 
     <div class="card">
         <h2 data-t="h_status">目標設定（カフェイン研究所）</h2>
+        
+        <div style="margin-bottom: 12px;">
+            <label data-t="cur_lv">現在 Lv : 耐性 (基礎値)</label>
+            <div class="stepper-ctrl">
+                <button class="step-btn" onclick="app.step('cur', -1)">－</button>
+                <div class="step-display">
+                    <span id="disp-cur-lv" class="val-lv">0</span>
+                    <span class="val-sep">:</span>
+                    <span id="disp-cur-res" class="val-res">0</span>
+                </div>
+                <button class="step-btn" onclick="app.step('cur', 1)">＋</button>
+            </div>
+            <select id="lab-cur" style="display:none;"></select>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label data-t="tgt_lv">目標 Lv : 耐性 (基礎値)</label>
+            <div class="stepper-ctrl">
+                <button class="step-btn" onclick="app.step('tgt', -1)">－</button>
+                <div class="step-display">
+                    <span id="disp-tgt-lv" class="val-lv">0</span>
+                    <span class="val-sep">:</span>
+                    <span id="disp-tgt-res" class="val-res">0</span>
+                </div>
+                <button class="step-btn" onclick="app.step('tgt', 1)">＋</button>
+            </div>
+            <select id="lab-tgt" style="display:none;"></select>
+        </div>
+
         <div class="grid cols-2">
-            <div>
-                <label data-t="cur_lv">現在 Lv</label>
-                <select id="lab-cur" onchange="app.onCurChange()"></select>
-            </div>
-            <div>
-                <label data-t="tgt_lv">目標 Lv</label>
-                <select id="lab-tgt" onchange="app.calc()"></select>
-            </div>
             <div>
                 <label data-t="stock">保有量</label>
                 <input type="text" id="stock" placeholder="0 (1K, 1M...)" 
@@ -68,16 +89,12 @@
     </div>
 
     <div class="card">
-        <h2 data-t="h_buff">コーヒーバフ (ウイルス耐性)</h2>
-        <div class="grid cols-2 checkbox-group">
-            <label>
-                <input type="checkbox" id="buff-250" onchange="app.toggleBuff(250)">
-                <span>+250</span>
-            </label>
-            <label>
-                <input type="checkbox" id="buff-500" onchange="app.toggleBuff(500)">
-                <span>+500</span>
-            </label>
+        <h2 data-t="h_buff">バフ (ウイルス耐性)</h2>
+        <div class="buff-group">
+            <div class="buff-chip" id="btn-buff-250" onclick="app.toggleBuffBtn(250)"><span style="font-size:1.1em; margin-left:4px;">+250</span>
+            </div>
+            <div class="buff-chip" id="btn-buff-500" onclick="app.toggleBuffBtn(500)"><span style="font-size:1.1em; margin-left:4px;">+500</span>
+            </div>
         </div>
     </div>
 
@@ -92,7 +109,7 @@
             <span class="res-val" id="res-cost">0</span>
         </div>
         <div class="res-row">
-            <span data-t="r_virus">ウイルス耐性</span>
+            <span data-t="r_virus" style="font-size:0.9rem;">ウイルス耐性 (バフ込)</span>
             <span class="res-val" id="res-virus">0 → 0</span>
         </div>
         
