@@ -63,17 +63,28 @@ label {
     margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
 }
 
-select, input {
+/* 【重要修正】チェックボックス以外(text, number等)にスタイルを適用 */
+select, input:not([type="checkbox"]) {
     width: 100%; padding: 12px;
     border: 1px solid var(--c-border); border-radius: 8px;
     font-size: 16px; background: #FAFAFA; box-sizing: border-box;
     color: var(--c-text); appearance: none;
 }
-select:focus, input:focus {
+select:focus, input:not([type="checkbox"]):focus {
     border-color: var(--c-accent);
     background: #FFF;
     outline: none;
     box-shadow: 0 0 0 3px rgba(191, 54, 12, 0.2);
+}
+
+/* チェックボックス専用スタイル */
+input[type="checkbox"] {
+    appearance: auto;         /* ブラウザ標準のチェックボックスを表示 */
+    -webkit-appearance: checkbox; /* Safari用 */
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--c-primary); /* チェック時の色をテーマカラーに */
 }
 
 /* --- Grid Layouts --- */
@@ -184,8 +195,7 @@ select:focus, input:focus {
     padding: 0 10px;
     font-family: 'Roboto Mono', monospace;
     font-size: 1.2rem;
-    /* カーソルをデフォルトにしてクリックできないことを明示 */
-    cursor: default; 
+    cursor: default; /* クリック不可 */
     user-select: none;
 }
 
@@ -228,4 +238,11 @@ select:focus, input:focus {
     border-color: #007AFF;
     color: #FFF;
     box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+}
+
+/* --- 非活性化状態（週間配達用） --- */
+.disabled-item {
+    opacity: 0.4;
+    pointer-events: none;
+    filter: grayscale(100%);
 }
