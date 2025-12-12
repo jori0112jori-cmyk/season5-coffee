@@ -275,11 +275,18 @@ const app = (() => {
         const tLv = parseInt($('lab-tgt')?.value || 0);
         const rate = parseFloat($('discount')?.value || 0);
 
+        // 【修正】割引計算を整数ベースに変更（誤差防止）
+        // rate(%) を10倍して整数化 (2.5% -> 25)
+        // 100% = 1000 として計算
+        const rateInt = Math.round(rate * 10);
+        const factor = 1000 - rateInt;
+
         let realCost = 0; 
         if(cLv < tLv) {
             for(let i = cLv; i < tLv; i++) {
                 const baseCost = DATA.COSTS[i+1] || 0;
-                const discountedCost = Math.ceil(baseCost * (1 - rate/100));
+                // 小数を使わず計算: ceil((Cost * (1000 - rate*10)) / 1000)
+                const discountedCost = Math.ceil((baseCost * factor) / 1000);
                 realCost += discountedCost;
             }
         }
@@ -325,7 +332,7 @@ const app = (() => {
         d.setHours(nowVal[0]||0, nowVal[1]||0, 0, 0);
         d.setMinutes(d.getMinutes() + (hoursNeeded * 60));
 
-        // 【修正箇所】d.getHours() の周りの pz() を削除して、0埋めなし（9:05形式）に変更
+        // 時刻表示：d.getHours() はそのまま（9時なら"9"）、分は0埋め（5分なら"05"）
         setMsg(elMsg, elTime, "msg_wait", `${d.getHours()}:${pz(d.getMinutes())}`, "#BF360C");
         elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
     };
@@ -353,7 +360,7 @@ const app = (() => {
     };
     const setNow = () => {
         const d = new Date();
-        // ここはHTMLのinput type="time"用なのでHH:MM（0埋め）必須
+        // input type="time" は HH:MM 形式（0埋め）が必須
         $('now-time').value = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
         const elDate = $('now-date');
         if(elDate) elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
