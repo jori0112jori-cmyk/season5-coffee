@@ -10,8 +10,8 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            cur_lv: "　　　　　　　現在Lv：ウイルス耐性", 
-            tgt_lv: "　　　　　　　目標Lv：ウイルス耐性", 
+            cur_lv: "現在Lv：ウイルス耐性", 
+            tgt_lv: "目標Lv：ウイルス耐性", 
             stock: "保有量", 
             disc: "消費減少率(%)", 
             h_res: "計算結果", 
@@ -125,14 +125,11 @@ const app = (() => {
         }
         fillSel('weekly-lv', 0, 30);
         
-        // ステッパー用の隠しセレクトボックス
-        // 値保持のために存在しますが、UI上には表示しません
+        // ステッパー用の隠しセレクトボックス（値保持用）
         fillSel('lab-cur', 0, CONFIG.MAX_LV);
         fillSel('lab-tgt', 1, CONFIG.MAX_LV);
         
-        const dSel = $('discount');
-        dSel.innerHTML = '';
-        for(let i=0; i<=20; i+=0.5) dSel.add(new Option(i.toFixed(1)+'%', i));
+        // 割引率のプルダウン生成は削除しました
     };
 
     const fillSel = (id, min, max) => {
@@ -156,8 +153,29 @@ const app = (() => {
         }
     };
 
-    // --- 共通ステッパー操作 (ボタンのみ) ---
+    // --- ステッパー操作 (ボタンのみ) ---
     const step = (type, delta) => {
+        
+        // --- 割引率 (disc) の場合 ---
+        if(type === 'disc') {
+            const el = $('discount'); // hidden input
+            let val = parseFloat(el.value || 0);
+            val += delta;
+            
+            // 範囲制限 (0% ~ 20% と仮定)
+            if(val < 0) val = 0;
+            if(val > 20) val = 20;
+
+            // 浮動小数点の誤差対策 (例: 0.500000001を防ぐ)
+            val = Math.round(val * 10) / 10;
+
+            el.value = val;
+            $('disp-disc').textContent = val.toFixed(1); // 表示更新
+            calc();
+            return;
+        }
+
+        // --- 以下、Lv (cur, tgt) の場合 ---
         const id = `lab-${type}`; // 隠し要素のID
         const el = $(id);
         if(!el) return;
@@ -172,7 +190,7 @@ const app = (() => {
         // 値を更新
         el.value = val;
         
-        // 現在Lv変更時のチェックまたは計算実行
+        // Lv変更時のチェックと表示更新
         if(type === 'cur') onCurChange();
         else calc();
     };
@@ -217,11 +235,15 @@ const app = (() => {
         if($('disp-tgt-res')) {
             $('disp-tgt-res').textContent = tgtBase.toLocaleString();
         }
+        
+        // 割引率の表示更新は step 関数または loadData で行うが、
+        // 念のためここでも値がズレないように設定しておく
+        const discVal = parseFloat($('discount').value || 0);
+        if($('disp-disc')) $('disp-disc').textContent = discVal.toFixed(1);
     };
 
     // --- 計算メイン ---
     const calc = () => {
-        // ステッパー表示を更新 (基礎値のみ)
         updateSteppers();
 
         let hourlyProd = 0;
@@ -344,7 +366,11 @@ const app = (() => {
         if(d.lc) $('lab-cur').value = d.lc;
         if(d.lt) $('lab-tgt').value = d.lt;
         if(d.st) $('stock').value = d.st;
-        if(d.ds) $('discount').value = d.ds;
+        // 割引率の読み込みと表示更新
+        if(d.ds) {
+            $('discount').value = d.ds;
+            if($('disp-disc')) $('disp-disc').textContent = parseFloat(d.ds).toFixed(1);
+        }
         if(d.bf) {
             activeBuff = parseInt(d.bf);
             const btn250 = $('btn-buff-250');
