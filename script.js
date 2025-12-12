@@ -329,7 +329,7 @@ const app = (() => {
         d.setHours(nowVal[0]||0, nowVal[1]||0, 0, 0);
         d.setMinutes(d.getMinutes() + (hoursNeeded * 60));
 
-        setMsg(elMsg, elTime, "msg_wait", `${pz(d.getHours())}:${pz(d.getMinutes())}`, "#BF360C");
+        setMsg(elMsg, elTime, "msg_wait", `${d.getHours())}:${pz(d.getMinutes()}`, "#BF360C");
         elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
     };
 
