@@ -10,8 +10,14 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            cur_lv: "現在Lv：ウイルス耐性", 
-            tgt_lv: "目標Lv：ウイルス耐性", 
+            
+            // --- 更新・追加箇所 ---
+            cur_lv: "現在",
+            tgt_lv: "目標",
+            lbl_lv: "Lv:",
+            lbl_res: "耐性:",
+            // ---------------------
+
             stock: "保有量", 
             disc: "消費減少率(%)", 
             h_res: "計算結果", 
@@ -34,8 +40,14 @@ const DEFAULT_DATA = {
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
-            cur_lv: "Current Lv：Virus Resistance", 
-            tgt_lv: "Target Lv：Virus Resistance", 
+
+            // --- 更新・追加箇所 ---
+            cur_lv: "Current",
+            tgt_lv: "Target",
+            lbl_lv: "Lv:",
+            lbl_res: "Resistance:",
+            // ---------------------
+
             stock: "Stock", 
             disc: "Resource Reduction(%)", 
             h_res: "Result", 
