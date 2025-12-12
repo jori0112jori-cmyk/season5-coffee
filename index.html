@@ -27,9 +27,14 @@
             </div>
         <div class="grid cols-2 mt-md">
             <div>
-                <label data-t="weekly">週間配達</label>
-                <select id="weekly-lv" onchange="app.calc()"></select>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <label data-t="weekly" style="margin-bottom:0;">週間配達</label>
+                    <input type="checkbox" id="weekly-active" onchange="app.toggleWeekly()" checked 
+                           style="width:20px; height:20px; margin:0; cursor:pointer;">
+                </div>
+                <select id="weekly-lv" onchange="app.calc()" style="transition: opacity 0.2s;"></select>
             </div>
+            
             <div>
                 <label style="white-space: nowrap;">
                     <span data-t="time">現在時刻</span>
