@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション (終末精鋭)", 
+            h_battle: "討伐シミュレーション (敵)", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -59,7 +59,7 @@ const DEFAULT_DATA = {
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
-            h_battle: "Battle Sim (Doom elite)",
+            h_battle: "Battle Sim (Enemy)",
 
             cur_lv: "Current Status",
             tgt_lv: "Target Status",
