@@ -7,7 +7,7 @@ const DEFAULT_DATA = {
     TEXT: {
         ja: { 
             title: "コーヒー生産計算機", 
-            tab_main: "メイン計算", 
+            tab_main: "メイン計算",
             tab_battle: "討伐シミュ",
 
             h_prod: "生産設定", 
@@ -100,7 +100,6 @@ let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENE
 // 配列の安全確保
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
-// Lv120まで確保
 while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
 
 /* --- App Logic --- */
@@ -139,7 +138,7 @@ const app = (() => {
             }, 50);
         } catch(err) {
             console.error("Init Error:", err);
-            alert("初期化エラー");
+            alert("初期化エラーが発生しました。リセットボタンを押すか、キャッシュをクリアしてください。");
         }
     };
 
@@ -218,14 +217,13 @@ const app = (() => {
             val += delta;
             if(val < 1) val = 1;
             
-            // 有効な最大データLvを探す
             let realMax = DATA.ENEMIES.findLastIndex(v => v > 0);
             if (realMax === -1) realMax = DATA.ENEMIES.length - 1;
 
             if(val > realMax) val = realMax;
             
             el.value = val;
-            calc(); // 手動操作時はターゲットリセットしない
+            calc(); 
             return;
         }
 
@@ -258,44 +256,48 @@ const app = (() => {
         const btn500 = $('btn-buff-500');
         if (activeBuff === val) {
             activeBuff = 0;
-            btn250.classList.remove('active');
-            btn500.classList.remove('active');
+            if(btn250) btn250.classList.remove('active');
+            if(btn500) btn500.classList.remove('active');
         } else {
             activeBuff = val;
             if(val === 250) {
-                btn250.classList.add('active');
-                btn500.classList.remove('active');
+                if(btn250) btn250.classList.add('active');
+                if(btn500) btn500.classList.remove('active');
             } else {
-                btn500.classList.add('active');
-                btn250.classList.remove('active');
+                if(btn500) btn500.classList.add('active');
+                if(btn250) btn250.classList.remove('active');
             }
         }
-        calc(true); // バフ変更時はターゲット強制更新
+        calc(true);
     };
 
     const toggleSkill = () => {
         skillActive = !skillActive;
         const btn = $('btn-skill');
-        if (skillActive) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+        if(btn) {
+            if (skillActive) btn.classList.add('active');
+            else btn.classList.remove('active');
         }
-        calc(true); // スキル変更時もターゲット強制更新
+        calc(true);
     };
 
     const switchTab = (tabName) => {
         currentTab = tabName;
+        const viewMain = $('view-main');
+        const viewBattle = $('view-battle');
+        const btnMain = $('tab-btn-main');
+        const btnBattle = $('tab-btn-battle');
+
         if(tabName === 'main') {
-            $('view-main').style.display = 'block';
-            $('view-battle').style.display = 'none';
-            $('tab-btn-main').classList.add('active');
-            $('tab-btn-battle').classList.remove('active');
+            if(viewMain) viewMain.style.display = 'block';
+            if(viewBattle) viewBattle.style.display = 'none';
+            if(btnMain) btnMain.classList.add('active');
+            if(btnBattle) btnBattle.classList.remove('active');
         } else {
-            $('view-main').style.display = 'none';
-            $('view-battle').style.display = 'block';
-            $('tab-btn-main').classList.remove('active');
-            $('tab-btn-battle').classList.add('active');
+            if(viewMain) viewMain.style.display = 'none';
+            if(viewBattle) viewBattle.style.display = 'block';
+            if(btnMain) btnMain.classList.remove('active');
+            if(btnBattle) btnBattle.classList.add('active');
         }
         calc();
     };
@@ -326,7 +328,7 @@ const app = (() => {
         if(tEl && parseInt(tEl.value) <= cLv) {
             tEl.value = Math.min(cLv + 1, CONFIG.MAX_LV);
         }
-        calc(true); // 自分のレベルが変わったらターゲット更新
+        calc(true);
     };
 
     const calc = (resetTarget = false) => {
@@ -334,18 +336,19 @@ const app = (() => {
 
         let hourlyProd = 0;
         for(let i=1; i<=4; i++) {
-            const lv = parseInt($(`f${i}`)?.value || 0);
+            const el = $(`f${i}`);
+            const lv = parseInt(el ? el.value : 0);
             hourlyProd += (lv * CONFIG.PROD_BASE);
         }
         
-        const weeklyActive = $('weekly-active').checked;
-        const weeklyLv = parseInt($('weekly-lv')?.value || 0);
+        const weeklyActive = $('weekly-active') ? $('weekly-active').checked : false;
+        const weeklyLv = parseInt($('weekly-lv') ? $('weekly-lv').value : 0);
         if (weeklyActive) {
             hourlyProd += (weeklyLv * CONFIG.PROD_BASE);
         }
 
-        $('total-prod').innerHTML = fmtKM(hourlyProd, true) + '/h';
-        $('res-daily').innerHTML = fmtKM(hourlyProd * 24, true);
+        if($('total-prod')) $('total-prod').innerHTML = fmtKM(hourlyProd, true) + '/h';
+        if($('res-daily')) $('res-daily').innerHTML = fmtKM(hourlyProd * 24, true);
 
         const cLv = parseInt($('lab-cur')?.value || 0);
         const tLv = parseInt($('lab-tgt')?.value || 0);
@@ -362,7 +365,7 @@ const app = (() => {
                 realCost += discountedCost;
             }
         }
-        $('res-cost').innerHTML = fmt(realCost);
+        if($('res-cost')) $('res-cost').innerHTML = fmt(realCost);
 
         const wBonus = (weeklyActive && weeklyLv >= 1) ? 250 : 0;
         const totalBonus = wBonus + activeBuff;
@@ -372,21 +375,20 @@ const app = (() => {
         const tgtVirusBase = DATA.VIRUS[tLv] || 0;
         const tgtVirusTotal = tgtVirusBase + totalBonus;
 
-        $('res-virus').textContent = `${fmt(curVirusTotal)} → ${fmt(tgtVirusTotal)}`;
+        if($('res-virus')) $('res-virus').textContent = `${fmt(curVirusTotal)} → ${fmt(tgtVirusTotal)}`;
 
-        // ★討伐シミュレーション計算
+        // ★討伐シミュレーション
         const skillBonus = skillActive ? 250 : 0;
         const battleVirusTotal = curVirusTotal + skillBonus;
 
         if($('disp-battle-my-lv')) $('disp-battle-my-lv').textContent = cLv;
         if($('disp-battle-my-res')) $('disp-battle-my-res').textContent = fmt(battleVirusTotal);
 
-        // --- 討伐可能ライン（最大レベル）計算 ---
         let maxWinLv = 0;
         let maxWinReq = 0;
+        
         for (let i = 1; i < DATA.ENEMIES.length; i++) {
-            if (DATA.ENEMIES[i] === 0) break; 
-
+            if (DATA.ENEMIES[i] === 0) break;
             if (DATA.ENEMIES[i] <= battleVirusTotal) {
                 maxWinLv = i;
                 maxWinReq = DATA.ENEMIES[i];
@@ -397,20 +399,17 @@ const app = (() => {
         if ($('disp-max-win-lv')) $('disp-max-win-lv').textContent = maxWinLv;
         if ($('disp-max-win-res')) $('disp-max-win-res').textContent = fmt(maxWinReq);
 
-        // --- ターゲット自動更新ロジック ---
-        // ★修正点: 手動操作(resetTarget=false)のときは強制変更しない
-        // バフ変更時(resetTarget=true)のみ、自動でターゲットを「次の敵」にリセットする
-        
+        // ターゲット自動更新
         let enemyLv = parseInt($('enemy-lv').value || 1);
         const nextTargetLv = maxWinLv + 1;
         
-        // 有効な最大レベル(120)を超えないようにする
         let realMax = DATA.ENEMIES.findLastIndex(v => v > 0);
         if (realMax === -1) realMax = DATA.ENEMIES.length - 1;
         
         const safeNextTarget = (nextTargetLv <= realMax) ? nextTargetLv : realMax;
 
-        if (resetTarget) {
+        // ★修正: resetTarget(手動以外の変化) または 現在値が既討伐Lv以下なら更新
+        if (resetTarget || enemyLv <= maxWinLv) {
             enemyLv = safeNextTarget;
             $('enemy-lv').value = enemyLv;
         }
@@ -418,45 +417,47 @@ const app = (() => {
         const enemyReq = DATA.ENEMIES[enemyLv] || 0;
         if($('disp-enemy-lv')) $('disp-enemy-lv').textContent = enemyLv;
         if($('disp-enemy-req')) $('disp-enemy-req').textContent = fmt(enemyReq);
-        // -----------------------------------------------------
 
+        // 判定結果
         const battleStatus = $('battle-status');
         const battleDetail = $('battle-detail');
         const box = $('battle-result');
 
-        if (enemyReq === 0) {
-             battleStatus.textContent = "";
-             battleDetail.textContent = "";
-             box.className = "battle-result-box";
-        } else if (battleVirusTotal >= enemyReq) {
-            battleStatus.textContent = ""; 
-            const txtOver = DATA.TEXT[lang].res_over;
-            battleDetail.innerHTML = `<span style="color:#2E7D32; font-weight:bold;">${txtOver}: +${fmt(battleVirusTotal - enemyReq)}</span>`;
-            box.className = "battle-result-box win";
-        } else {
-            battleStatus.textContent = "";
-            const diff = enemyReq - battleVirusTotal;
-            const rawRatio = diff / enemyReq;
-            const percentCeiled = Math.ceil(rawRatio * 100);
-            
-            const penaltyPercent = percentCeiled * 2;
-            let damageRate = 100 - penaltyPercent;
-            if (damageRate < 0) damageRate = 0;
+        if (box && battleDetail) {
+            if (enemyReq === 0) {
+                 if(battleStatus) battleStatus.textContent = "";
+                 battleDetail.textContent = "";
+                 box.className = "battle-result-box";
+            } else if (battleVirusTotal >= enemyReq) {
+                if(battleStatus) battleStatus.textContent = ""; 
+                const txtOver = DATA.TEXT[lang].res_over;
+                battleDetail.innerHTML = `<span style="color:#2E7D32; font-weight:bold;">${txtOver}: +${fmt(battleVirusTotal - enemyReq)}</span>`;
+                box.className = "battle-result-box win";
+            } else {
+                if(battleStatus) battleStatus.textContent = "";
+                const diff = enemyReq - battleVirusTotal;
+                const rawRatio = diff / enemyReq;
+                const percentCeiled = Math.ceil(rawRatio * 100);
+                
+                const penaltyPercent = percentCeiled * 2;
+                let damageRate = 100 - penaltyPercent;
+                if (damageRate < 0) damageRate = 0;
 
-            let displayPenalty = penaltyPercent;
-            if (displayPenalty >= 100) displayPenalty = 99.9;
+                let displayPenalty = penaltyPercent;
+                if (displayPenalty >= 100) displayPenalty = 99.9;
 
-            const txtShort = DATA.TEXT[lang].res_short;
-            const txtDmg = DATA.TEXT[lang].res_dmg;
-            const txtPena = DATA.TEXT[lang].res_pena;
+                const txtShort = DATA.TEXT[lang].res_short;
+                const txtDmg = DATA.TEXT[lang].res_dmg;
+                const txtPena = DATA.TEXT[lang].res_pena;
 
-            battleDetail.innerHTML = `
-                ${txtShort}: ${fmt(diff)}<br>
-                <div style="margin-top:4px; font-weight:bold; color:#C62828;">
-                    ${txtDmg}: ${damageRate}% (${txtPena}: -${displayPenalty}%)
-                </div>
-            `;
-            box.className = "battle-result-box lose";
+                battleDetail.innerHTML = `
+                    ${txtShort}: ${fmt(diff)}<br>
+                    <div style="margin-top:4px; font-weight:bold; color:#C62828;">
+                        ${txtDmg}: ${damageRate}% (${txtPena}: -${displayPenalty}%)
+                    </div>
+                `;
+                box.className = "battle-result-box lose";
+            }
         }
 
         const stock = parseStock($('stock')?.value || 0);
@@ -467,7 +468,7 @@ const app = (() => {
             safeShortage = Math.ceil(shortage / 1000) * 1000;
         }
 
-        $('res-short').innerHTML = fmtKM(safeShortage, true);
+        if($('res-short')) $('res-short').innerHTML = fmtKM(safeShortage, true);
         updateStatus(safeShortage, hourlyProd);
     };
 
@@ -475,6 +476,7 @@ const app = (() => {
         const elTime = $('res-time');
         const elDate = $('res-date');
         const elMsg = $('status-msg');
+        if(!elTime || !elDate || !elMsg) return;
 
         if(shortage <= 0) {
             setMsg(elMsg, elTime, "msg_ok", "OK", "#4E342E");
@@ -498,7 +500,9 @@ const app = (() => {
     };
 
     const setMsg = (msgEl, timeEl, msgKey, timeText, color) => {
-        msgEl.textContent = DATA.TEXT[lang][msgKey];
+        if(DATA.TEXT[lang] && DATA.TEXT[lang][msgKey]) {
+            msgEl.textContent = DATA.TEXT[lang][msgKey];
+        }
         msgEl.style.color = color === "#BF360C" ? "#5D4037" : color; 
         timeEl.textContent = timeText;
         timeEl.style.color = color;
@@ -523,7 +527,8 @@ const app = (() => {
     
     const setNow = () => {
         const d = new Date();
-        $('now-time').value = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
+        const tEl = $('now-time');
+        if(tEl) tEl.value = `${pz(d.getHours())}:${pz(d.getMinutes())}`;
         const elDate = $('now-date');
         if(elDate) elDate.textContent = `${d.getMonth()+1}/${d.getDate()}`;
         calc();
@@ -531,7 +536,7 @@ const app = (() => {
 
     const save = () => {
         const data = {
-            fs: [1,2,3,4].map(i => $(`f${i}`).value),
+            fs: [1,2,3,4].map(i => { const e=$( `f${i}` ); return e?e.value:0; }),
             wk: $('weekly-lv').value,
             wa: $('weekly-active').checked,
             lc: $('lab-cur').value,
@@ -578,8 +583,10 @@ const app = (() => {
         if(d.sa !== undefined) {
             skillActive = d.sa;
             const btn = $('btn-skill');
-            if(skillActive) btn.classList.add('active');
-            else btn.classList.remove('active');
+            if(btn) {
+                if(skillActive) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
         }
     };
 
@@ -592,41 +599,26 @@ const app = (() => {
         localStorage.setItem('s5_lang', l);
         $$('[data-t]').forEach(el => {
             const key = el.getAttribute('data-t');
-            if(DATA.TEXT[l][key]) el.textContent = DATA.TEXT[l][key];
+            if(DATA.TEXT[l] && DATA.TEXT[l][key]) el.textContent = DATA.TEXT[l][key];
         });
         $$('.flag-icon').forEach(e => e.classList.toggle('active', e.getAttribute('onclick').includes(l)));
         calc();
     };
 
-    const onCurChange = () => {
-        const cLv = parseInt($('lab-cur')?.value || 0);
-        const tEl = $('lab-tgt');
-        if(tEl && parseInt(tEl.value) <= cLv) {
-            tEl.value = Math.min(cLv + 1, CONFIG.MAX_LV);
-        }
-        calc(true);
-    };
-
     const toggleAdmin = () => {
         const p = $('admin-panel');
-        if(p.style.display === 'none') {
-            p.style.display = 'block';
+        if(p) p.style.display = (p.style.display === 'none') ? 'block' : 'none';
+        if(p.style.display === 'block') {
             $('admin-costs').value = DATA.COSTS.join(', ');
             $('admin-virus').value = DATA.VIRUS.join(', ');
             $('admin-enemies').value = DATA.ENEMIES.join(', ');
-        } else {
-            p.style.display = 'none';
         }
     };
     const saveAdmin = () => {
         try {
-            const strCost = $('admin-costs').value;
-            const strVirus = $('admin-virus').value;
-            const strEnemies = $('admin-enemies').value;
-            
-            const newCosts = strCost.split(',').map(s => parseInt(s.trim()) || 0);
-            const newVirus = strVirus.split(',').map(s => parseInt(s.trim()) || 0);
-            const newEnemies = strEnemies.split(',').map(s => parseInt(s.trim()) || 0);
+            const newCosts = $('admin-costs').value.split(',').map(s => parseInt(s.trim()) || 0);
+            const newVirus = $('admin-virus').value.split(',').map(s => parseInt(s.trim()) || 0);
+            const newEnemies = $('admin-enemies').value.split(',').map(s => parseInt(s.trim()) || 0);
             
             const customData = { COSTS: newCosts, VIRUS: newVirus, ENEMIES: newEnemies };
             localStorage.setItem(CONFIG.DATA_KEY, JSON.stringify(customData));
@@ -641,11 +633,14 @@ const app = (() => {
         }
     };
     
-    return { 
+    // Explicitly expose to window to ensure HTML inline events work
+    window.app = { 
         init, calc, save, reset, setLang, setNow, onCurChange, 
         toggleAdmin, saveAdmin, resetAdmin, 
         toggleBuffBtn, step, toggleWeekly, switchTab, toggleSkill
     };
+    
+    return window.app;
 })();
 
 document.addEventListener('DOMContentLoaded', app.init);
