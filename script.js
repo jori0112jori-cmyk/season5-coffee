@@ -7,7 +7,7 @@ const DEFAULT_DATA = {
     TEXT: {
         ja: { 
             title: "コーヒー生産計算機", 
-            tab_main: "メイン計算",
+            tab_main: "メイン計算", 
             tab_battle: "討伐シミュ",
 
             h_prod: "生産設定", 
@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション (敵)", 
+            h_battle: "討伐シミュレーション (終末精鋭)", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -51,7 +51,7 @@ const DEFAULT_DATA = {
         },
         en: { 
             title: "Coffee Calc", 
-            tab_main: "Main Calc",
+            tab_main: "Main Calc", 
             tab_battle: "Battle Sim",
 
             h_prod: "Production", 
@@ -59,7 +59,7 @@ const DEFAULT_DATA = {
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
-            h_battle: "Battle Sim (Enemy)",
+            h_battle: "Battle Sim (Doom elite)",
 
             cur_lv: "Current Status",
             tgt_lv: "Target Status",
@@ -97,10 +97,8 @@ const DEFAULT_DATA = {
 };
 
 let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENEMIES: [...DEFAULT_DATA.ENEMIES], TEXT: DEFAULT_DATA.TEXT };
-// 配列の安全確保
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
-// Lv120まで確保
 while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
 
 /* --- App Logic --- */
@@ -208,7 +206,7 @@ const app = (() => {
             val = Math.round(val * 10) / 10;
             el.value = val;
             $('disp-disc').textContent = val.toFixed(1);
-            calc();
+            calc(true);
             return;
         }
 
@@ -218,14 +216,13 @@ const app = (() => {
             val += delta;
             if(val < 1) val = 1;
             
-            // ★修正: 耐性が0でない（有効な）最大レベルを探す
             let realMax = DATA.ENEMIES.findLastIndex(v => v > 0);
             if (realMax === -1) realMax = DATA.ENEMIES.length - 1;
 
             if(val > realMax) val = realMax;
             
             el.value = val;
-            calc();
+            calc(); // 手動操作時はターゲットリセットしない
             return;
         }
 
@@ -250,7 +247,7 @@ const app = (() => {
         } else {
             sel.classList.add('disabled-item');
         }
-        calc(true);
+        calc(true); // ターゲット再計算
     };
 
     const toggleBuffBtn = (val) => {
@@ -270,7 +267,7 @@ const app = (() => {
                 btn250.classList.remove('active');
             }
         }
-        calc(true);
+        calc(true); // ターゲット再計算
     };
 
     const toggleSkill = () => {
@@ -281,7 +278,7 @@ const app = (() => {
         } else {
             btn.classList.remove('active');
         }
-        calc(true);
+        calc(true); // ターゲット再計算
     };
 
     const switchTab = (tabName) => {
@@ -320,6 +317,17 @@ const app = (() => {
         if($('disp-enemy-req')) $('disp-enemy-req').textContent = enemyReq.toLocaleString();
     };
 
+    const onCurChange = () => {
+        const cLv = parseInt($('lab-cur')?.value || 0);
+        const tEl = $('lab-tgt');
+        if(tEl && parseInt(tEl.value) <= cLv) {
+            tEl.value = Math.min(cLv + 1, CONFIG.MAX_LV);
+        }
+        // ★修正: 自分のステータスが変わったら、ターゲットも自動更新
+        calc(true);
+    };
+
+    // --- 計算メイン ---
     const calc = (resetTarget = false) => {
         updateSteppers();
 
@@ -376,9 +384,8 @@ const app = (() => {
         let maxWinLv = 0;
         let maxWinReq = 0;
         
-        // ★修正: 耐性0のデータ（枠だけあって中身がない）は無視する
         for (let i = 1; i < DATA.ENEMIES.length; i++) {
-            if (DATA.ENEMIES[i] === 0) break; // <-- これで121以降の0を無視
+            if (DATA.ENEMIES[i] === 0) break; 
 
             if (DATA.ENEMIES[i] <= battleVirusTotal) {
                 maxWinLv = i;
@@ -394,12 +401,13 @@ const app = (() => {
         let enemyLv = parseInt($('enemy-lv').value || 1);
         const nextTargetLv = maxWinLv + 1;
         
-        // 有効な最大レベル(120)を超えないようにする
         let realMax = DATA.ENEMIES.findLastIndex(v => v > 0);
         if (realMax === -1) realMax = DATA.ENEMIES.length - 1;
-        
         const safeNextTarget = (nextTargetLv <= realMax) ? nextTargetLv : realMax;
 
+        // ★ロジック: 
+        // 1. バフ操作(resetTarget=true)なら強制的に「次の目標」へ
+        // 2. 「現在選択中の敵Lv」が「すでに倒せる敵Lv」以下なら、「次の目標」へ引き上げ
         if (resetTarget || enemyLv <= maxWinLv) {
             enemyLv = safeNextTarget;
             $('enemy-lv').value = enemyLv;
@@ -594,7 +602,7 @@ const app = (() => {
         if(tEl && parseInt(tEl.value) <= cLv) {
             tEl.value = Math.min(cLv + 1, CONFIG.MAX_LV);
         }
-        calc();
+        calc(true); // ステータス変更時もターゲット強制更新
     };
 
     const toggleAdmin = () => {
