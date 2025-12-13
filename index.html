@@ -18,135 +18,209 @@
         </div>
     </header>
 
-    <div class="card">
-        <h2>
-            <span data-t="h_prod">生産設定</span>
-            <span id="total-prod" class="font-mono text-primary" style="font-size:1.1rem;">0/h</span>
-        </h2>
-        <div class="grid cols-4" id="factory-area">
-            </div>
-        <div class="grid cols-2 mt-md">
-            <div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <label data-t="weekly" style="margin-bottom:0;">週間配達</label>
-                    <input type="checkbox" id="weekly-active" onchange="app.toggleWeekly()" checked 
-                           style="width:20px; height:20px; margin:0; cursor:pointer;">
-                </div>
-                <select id="weekly-lv" onchange="app.calc()" style="transition: opacity 0.2s;"></select>
-            </div>
-            
-            <div>
-                <label style="white-space: nowrap;">
-                    <span data-t="time">現在時刻</span>
-                    <span id="now-date" style="margin-left: 8px; color: #5D4037; font-weight: bold;"></span>
-                </label>
-                <div class="time-wrapper">
-                    <input type="time" id="now-time" onchange="app.calc()">
-                    <button class="btn-now" onclick="app.setNow()" data-t="btn_now">現在</button>
-                </div>
-            </div>
-        </div>
+    <div class="tab-menu">
+        <button id="tab-btn-main" class="tab-item active" onclick="app.switchTab('main')" data-t="tab_main">メイン計算</button>
+        <button id="tab-btn-battle" class="tab-item" onclick="app.switchTab('battle')" data-t="tab_battle">討伐シミュ</button>
     </div>
 
-    <div class="card">
-        <h2 data-t="h_status">目標設定（カフェイン研究所）</h2>
+    <div id="view-main" class="tab-content">
         
-        <div style="margin-bottom: 12px;">
-            <label data-t="cur_lv" style="text-align:center;">現在ステータス</label>
-            <div class="stepper-ctrl">
-                <button class="step-btn" onclick="app.step('cur', -1)">－</button>
-                <div class="step-display">
-                    <span class="sub-label" data-t="lbl_lv">Lv:</span>
-                    <span id="disp-cur-lv" class="val-lv">0</span>
-                    <span class="sub-sep"></span>
-                    <span class="sub-label" data-t="lbl_res">耐性:</span>
-                    <span id="disp-cur-res" class="val-res">0</span>
+        <div class="card">
+            <h2>
+                <span data-t="h_prod">生産設定</span>
+                <span id="total-prod" class="font-mono text-primary" style="font-size:1.1rem;">0/h</span>
+            </h2>
+            <div class="grid cols-4" id="factory-area">
                 </div>
-                <button class="step-btn" onclick="app.step('cur', 1)">＋</button>
-            </div>
-            <select id="lab-cur" style="display:none;"></select>
-        </div>
-
-        <div style="margin-bottom: 12px;">
-            <label data-t="tgt_lv" style="text-align:center;">目標ステータス</label>
-            <div class="stepper-ctrl">
-                <button class="step-btn" onclick="app.step('tgt', -1)">－</button>
-                <div class="step-display">
-                    <span class="sub-label" data-t="lbl_lv">Lv:</span>
-                    <span id="disp-tgt-lv" class="val-lv">0</span>
-                    <span class="sub-sep"></span>
-                    <span class="sub-label" data-t="lbl_res">耐性:</span>
-                    <span id="disp-tgt-res" class="val-res">0</span>
-                </div>
-                <button class="step-btn" onclick="app.step('tgt', 1)">＋</button>
-            </div>
-            <select id="lab-tgt" style="display:none;"></select>
-        </div>
-
-        <div class="grid cols-2">
-            <div>
-                <label data-t="stock">保有量</label>
-                <input type="text" id="stock" placeholder="0 (1K, 1M...)" 
-                       onfocus="this.select()" oninput="app.calc()" 
-                       enterkeyhint="done">
-            </div>
-            <div>
-                <label data-t="disc">割引率 (%)</label>
-                <div class="stepper-ctrl">
-                    <button class="step-btn" onclick="app.step('disc', -0.5)">－</button>
-                    <div class="step-display">
-                        <span id="disp-disc" class="val-lv">0.0</span>
-                        <span class="val-sep">%</span>
+            <div class="grid cols-2 mt-md">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label data-t="weekly" style="margin-bottom:0;">週間配達</label>
+                        <input type="checkbox" id="weekly-active" onchange="app.toggleWeekly()" checked 
+                               style="width:20px; height:20px; margin:0; cursor:pointer;">
                     </div>
-                    <button class="step-btn" onclick="app.step('disc', 0.5)">＋</button>
+                    <select id="weekly-lv" onchange="app.calc()" style="transition: opacity 0.2s;"></select>
                 </div>
-                <input type="hidden" id="discount" value="0">
+                
+                <div>
+                    <label style="white-space: nowrap;">
+                        <span data-t="time">現在時刻</span>
+                        <span id="now-date" style="margin-left: 8px; color: #5D4037; font-weight: bold;"></span>
+                    </label>
+                    <div class="time-wrapper">
+                        <input type="time" id="now-time" onchange="app.calc()">
+                        <button class="btn-now" onclick="app.setNow()" data-t="btn_now">現在</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="card">
-        <h2 data-t="h_buff">バフ (ウイルス耐性)</h2>
-        <div class="buff-group">
-            <div class="buff-chip" id="btn-buff-250" onclick="app.toggleBuffBtn(250)"><span style="font-size:1.1em; margin-left:4px;">+250</span>
+        <div class="card">
+            <h2 data-t="h_status">目標設定（カフェイン研究所）</h2>
+            
+            <div style="margin-bottom: 12px;">
+                <label data-t="cur_lv" style="text-align:center;">現在ステータス</label>
+                <div class="stepper-ctrl">
+                    <button class="step-btn" onclick="app.step('cur', -1)">－</button>
+                    <div class="step-display">
+                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
+                        <span id="disp-cur-lv" class="val-lv">0</span>
+                        <span class="sub-sep"></span>
+                        <span class="sub-label" data-t="lbl_res">耐性:</span>
+                        <span id="disp-cur-res" class="val-res">0</span>
+                    </div>
+                    <button class="step-btn" onclick="app.step('cur', 1)">＋</button>
+                </div>
+                <select id="lab-cur" style="display:none;"></select>
             </div>
-            <div class="buff-chip" id="btn-buff-500" onclick="app.toggleBuffBtn(500)"><span style="font-size:1.1em; margin-left:4px;">+500</span>
-            </div>
-        </div>
-    </div>
 
-    <div class="card result-card">
-        <h2 data-t="h_res">計算結果</h2>
-        <div class="res-row">
-            <span data-t="r_daily">日産 (24h)</span>
-            <span class="res-val" id="res-daily">0</span>
+            <div style="margin-bottom: 12px;">
+                <label data-t="tgt_lv" style="text-align:center;">目標ステータス</label>
+                <div class="stepper-ctrl">
+                    <button class="step-btn" onclick="app.step('tgt', -1)">－</button>
+                    <div class="step-display">
+                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
+                        <span id="disp-tgt-lv" class="val-lv">0</span>
+                        <span class="sub-sep"></span>
+                        <span class="sub-label" data-t="lbl_res">耐性:</span>
+                        <span id="disp-tgt-res" class="val-res">0</span>
+                    </div>
+                    <button class="step-btn" onclick="app.step('tgt', 1)">＋</button>
+                </div>
+                <select id="lab-tgt" style="display:none;"></select>
+            </div>
+
+            <div class="grid cols-2">
+                <div>
+                    <label data-t="stock">保有量</label>
+                    <input type="text" id="stock" placeholder="0 (1K, 1M...)" 
+                           onfocus="this.select()" oninput="app.calc()" 
+                           enterkeyhint="done">
+                </div>
+                <div>
+                    <label data-t="disc">割引率 (%)</label>
+                    <div class="stepper-ctrl">
+                        <button class="step-btn" onclick="app.step('disc', -0.5)">－</button>
+                        <div class="step-display">
+                            <span id="disp-disc" class="val-lv">0.0</span>
+                            <span class="val-sep">%</span>
+                        </div>
+                        <button class="step-btn" onclick="app.step('disc', 0.5)">＋</button>
+                    </div>
+                    <input type="hidden" id="discount" value="0">
+                </div>
+            </div>
         </div>
-        <div class="res-row">
-            <span data-t="r_cost">必要総数</span>
-            <span class="res-val" id="res-cost">0</span>
-        </div>
-        <div class="res-row">
-            <span data-t="r_virus" style="font-size:0.9rem;">ウイルス耐性 (バフ込)</span>
-            <span class="res-val" id="res-virus">0 → 0</span>
+
+        <div class="card result-card">
+            <h2 data-t="h_res">計算結果</h2>
+            <div class="res-row">
+                <span data-t="r_daily">日産 (24h)</span>
+                <span class="res-val" id="res-daily">0</span>
+            </div>
+            <div class="res-row">
+                <span data-t="r_cost">必要総数</span>
+                <span class="res-val" id="res-cost">0</span>
+            </div>
+            <div class="res-row">
+                <span data-t="r_virus" style="font-size:0.9rem;">ウイルス耐性 (バフ込)</span>
+                <span class="res-val" id="res-virus">0 → 0</span>
+            </div>
+            
+            <div class="highlight-box">
+                <div id="status-msg" style="font-weight:bold; font-size:0.9rem;">入力待ち</div>
+                
+                <span class="big-time font-mono" id="res-time">--:--</span>
+                <span class="big-date" id="res-date">--/--</span>
+                
+                <div class="shortage-area">
+                    <span data-t="r_short" style="font-size:0.85rem; font-weight:bold;">不足</span>
+                    <span id="res-short" class="font-mono" style="font-size:1.3rem; font-weight:900;">0</span>
+                </div>
+            </div>
         </div>
         
-        <div class="highlight-box">
-            <div id="status-msg" style="font-weight:bold; font-size:0.9rem;">入力待ち</div>
+        <div class="btn-group">
+            <button class="btn btn-save" onclick="app.save()" data-t="btn_save">設定を保存</button>
+            <button class="btn btn-reset" onclick="app.reset()" data-t="btn_reset">リセット</button>
+        </div>
+    </div>
+
+
+    <div id="view-battle" class="tab-content" style="display:none;">
+        <div class="card">
+            <h2 data-t="h_battle">討伐シミュレーション (敵)</h2>
             
-            <span class="big-time font-mono" id="res-time">--:--</span>
-            <span class="big-date" id="res-date">--/--</span>
+            <div style="margin-bottom: 15px;">
+                <label style="text-align:center;" data-t="lbl_cur_buffed">現在のステータス (バフ込)</label>
+                <div class="stepper-ctrl">
+                    <button class="step-btn" onclick="app.step('cur', -1)">－</button>
+                    <div class="step-display">
+                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
+                        <span id="disp-battle-my-lv" class="val-lv">0</span>
+                        <span class="sub-sep"></span>
+                        <span class="sub-label" data-t="lbl_res">耐性:</span>
+                        <span id="disp-battle-my-res" class="val-res">0</span>
+                    </div>
+                    <button class="step-btn" onclick="app.step('cur', 1)">＋</button>
+                </div>
+            </div>
+
+            <div class="bonus-area">
+                <label style="text-align:center; margin-bottom:8px; font-size:0.9rem; color:#5D4037;">強化設定 (Buff & Skill)</label>
+                
+                <div class="buff-group" style="margin-bottom:12px;">
+                    <div class="buff-chip" id="btn-buff-250" onclick="app.toggleBuffBtn(250)">
+                        <span style="font-size:1em;">☕ +250</span>
+                    </div>
+                    <div class="buff-chip" id="btn-buff-500" onclick="app.toggleBuffBtn(500)">
+                        <span style="font-size:1em;">☕ +500</span>
+                    </div>
+                </div>
+
+                <div class="buff-group">
+                    <div class="buff-chip" id="btn-skill" onclick="app.toggleSkill()">
+                        <span style="font-size:0.9em; font-weight:bold;" data-t="lbl_skill">戦術スキル (+250)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-win-box">
+                <div class="label" data-t="lbl_max_win">討伐可能ライン (最大)</div>
+                <div class="value">
+                    <span class="sub-label">Lv:</span>
+                    <span id="disp-max-win-lv" style="font-size:1.4rem; font-weight:bold; color:#2E7D32;">-</span>
+                    <span class="sub-sep" style="width:10px;"></span>
+                    <span class="sub-label" data-t="lbl_res">耐性:</span>
+                    <span id="disp-max-win-res" style="font-size:1.2rem; font-weight:bold; color:#007AFF;">-</span>
+                </div>
+            </div>
+
+            <hr style="margin: 20px 0; border:0; border-top:1px dashed #CCC;">
+
+            <div style="margin-bottom: 12px;">
+                <label style="text-align:center;"><span data-t="lbl_enemy_lv">敵Lv</span> & <span data-t="lbl_req_res">必要耐性</span> </label>
+                <div class="stepper-ctrl">
+                    <button class="step-btn" onclick="app.step('enemy', -1)">－</button>
+                    <div class="step-display">
+                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
+                        <span id="disp-enemy-lv" class="val-lv">1</span>
+                        <span class="sub-sep"></span>
+                        <span class="sub-label" data-t="lbl_res">耐性:</span>
+                        <span id="disp-enemy-req" class="val-res" style="color:#D32F2F;">0</span>
+                    </div>
+                    <button class="step-btn" onclick="app.step('enemy', 1)">＋</button>
+                </div>
+                <input type="hidden" id="enemy-lv" value="1">
+            </div>
             
-            <div class="shortage-area">
-                <span data-t="r_short" style="font-size:0.85rem; font-weight:bold;">不足</span>
-                <span id="res-short" class="font-mono" style="font-size:1.3rem; font-weight:900;">0</span>
+            <div id="battle-result" class="battle-result-box">
+                <span id="battle-status" style="font-size:1.5rem; font-weight:900;"></span>
+                <div id="battle-detail" style="font-size:0.9rem;"></div>
             </div>
         </div>
     </div>
 
-    <div class="btn-group">
-        <button class="btn btn-save" onclick="app.save()" data-t="btn_save">設定を保存</button>
-        <button class="btn btn-reset" onclick="app.reset()" data-t="btn_reset">リセット</button>
-    </div>
 
     <div style="margin-top: 30px; text-align: center;">
         <button onclick="app.toggleAdmin()" style="background:none; border:none; color:#999; text-decoration:underline; font-size:0.8rem; cursor:pointer;">
@@ -160,12 +234,17 @@
         
         <div style="margin-bottom:15px;">
             <label style="display:block; font-weight:bold;">必要量 (Required Amount)</label>
-            <textarea id="admin-costs" style="width:100%; height:100px; font-family:monospace; font-size:0.8rem;"></textarea>
+            <textarea id="admin-costs" style="width:100%; height:80px; font-family:monospace; font-size:0.8rem;"></textarea>
         </div>
 
         <div style="margin-bottom:15px;">
             <label style="display:block; font-weight:bold;">ウイルス (VIRUS)</label>
-            <textarea id="admin-virus" style="width:100%; height:60px; font-family:monospace; font-size:0.8rem;"></textarea>
+            <textarea id="admin-virus" style="width:100%; height:50px; font-family:monospace; font-size:0.8rem;"></textarea>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="display:block; font-weight:bold;">敵の耐性 (ENEMIES) <span style="font-size:0.8em; font-weight:normal;">(Lv1, Lv2...)</span></label>
+            <textarea id="admin-enemies" style="width:100%; height:50px; font-family:monospace; font-size:0.8rem;"></textarea>
         </div>
 
         <div class="btn-group">
