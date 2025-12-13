@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション (終末精鋭)", 
+            h_battle: "討伐シミュレーション (敵)", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -23,15 +23,16 @@ const DEFAULT_DATA = {
             lbl_res: "耐性:",
             
             lbl_cur_buffed: "現在のステータス (バフ込)",
-            lbl_enemy_lv: "敵Lv",
+            lbl_next_target: "次の目標 (NEXT TARGET)",
             lbl_req_res: "必要耐性",
             lbl_skill: "戦術スキル: 悪魔狩・怪物殺し (+250)",
             lbl_max_win: "討伐可能ライン (最大)",
+            lbl_bonus: "強化設定 (Buff & Skill)",
             
             res_over: "超過",
             res_short: "不足",
             res_dmg: "ダメージ",
-            res_pena: "与ダメ",
+            res_pena: "ペナルティ",
 
             stock: "保有量", 
             disc: "消費減少率(%)", 
@@ -58,7 +59,7 @@ const DEFAULT_DATA = {
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
-            h_battle: "Battle Sim (Doom Elite)",
+            h_battle: "Battle Sim (Enemy)",
 
             cur_lv: "Current Status",
             tgt_lv: "Target Status",
@@ -70,6 +71,7 @@ const DEFAULT_DATA = {
             lbl_req_res: "Req Res",
             lbl_skill: "Tactical Skill: Monster Slayer (+250)",
             lbl_max_win: "Max Defeatable Limit",
+            lbl_bonus: "Bonus Settings (Buff & Skill)",
 
             res_over: "Surplus",
             res_short: "Shortage",
@@ -110,7 +112,7 @@ const app = (() => {
 
     let lang = 'ja';
     let activeBuff = 0; 
-    let skillActive = false; // 戦術スキルの状態
+    let skillActive = false; 
     let currentTab = 'main'; 
     
     const $ = id => document.getElementById(id);
@@ -217,7 +219,7 @@ const app = (() => {
             if(val > 120) val = 120; 
             if(val > maxEnemy) val = maxEnemy;
             el.value = val;
-            calc(); // 手動操作時はターゲットリセットしない
+            calc();
             return;
         }
 
@@ -242,7 +244,7 @@ const app = (() => {
         } else {
             sel.classList.add('disabled-item');
         }
-        calc(true); // 週間配達もバフ扱いなのでターゲット更新
+        calc(true);
     };
 
     const toggleBuffBtn = (val) => {
@@ -262,10 +264,9 @@ const app = (() => {
                 btn250.classList.remove('active');
             }
         }
-        calc(true); // バフ変更時はターゲット強制更新
+        calc(true);
     };
 
-    // ★新規: 戦術スキルのトグル関数
     const toggleSkill = () => {
         skillActive = !skillActive;
         const btn = $('btn-skill');
@@ -274,7 +275,7 @@ const app = (() => {
         } else {
             btn.classList.remove('active');
         }
-        calc(true); // スキル変更時もターゲット強制更新
+        calc(true);
     };
 
     const switchTab = (tabName) => {
@@ -313,8 +314,6 @@ const app = (() => {
         if($('disp-enemy-req')) $('disp-enemy-req').textContent = enemyReq.toLocaleString();
     };
 
-    // --- 計算メイン ---
-    // resetTarget: バフ変更時など、強制的に「次の目標」にリセットしたい場合に true を渡す
     const calc = (resetTarget = false) => {
         updateSteppers();
 
@@ -381,9 +380,7 @@ const app = (() => {
         if ($('disp-max-win-lv')) $('disp-max-win-lv').textContent = maxWinLv;
         if ($('disp-max-win-res')) $('disp-max-win-res').textContent = fmt(maxWinReq);
 
-        // --- ★ターゲット自動更新ロジック ---
-        // 1. バフ変更などのアクション時 (resetTarget=true) は強制的に「次の目標」にセット
-        // 2. 現在の選択が「すでに倒せる敵」以下になってしまった場合も「次の目標」に引き上げ
+        // --- ターゲット自動更新ロジック ---
         let enemyLv = parseInt($('enemy-lv').value || 1);
         const nextTargetLv = maxWinLv + 1;
         const safeNextTarget = (nextTargetLv < DATA.ENEMIES.length) ? nextTargetLv : (DATA.ENEMIES.length - 1);
@@ -421,6 +418,10 @@ const app = (() => {
             let damageRate = 100 - penaltyPercent;
             if (damageRate < 0) damageRate = 0;
 
+            // ★変更点: ペナルティ表示のキャップ処理 (-99.9%)
+            let displayPenalty = penaltyPercent;
+            if (displayPenalty >= 100) displayPenalty = 99.9;
+
             const txtShort = DATA.TEXT[lang].res_short;
             const txtDmg = DATA.TEXT[lang].res_dmg;
             const txtPena = DATA.TEXT[lang].res_pena;
@@ -428,7 +429,7 @@ const app = (() => {
             battleDetail.innerHTML = `
                 ${txtShort}: ${fmt(diff)}<br>
                 <div style="margin-top:4px; font-weight:bold; color:#C62828;">
-                    ${txtDmg}: ${damageRate}% (${txtPena}: -${penaltyPercent}%)
+                    ${txtDmg}: ${damageRate}% (${txtPena}: -${displayPenalty}%)
                 </div>
             `;
             box.className = "battle-result-box lose";
@@ -515,7 +516,7 @@ const app = (() => {
             ds: $('discount').value,
             bf: activeBuff,
             elv: $('enemy-lv').value,
-            sa: skillActive // スキル状態保存
+            sa: skillActive
         };
         localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify(data));
         alert(lang === 'ja' ? '保存しました' : 'Saved');
@@ -550,7 +551,6 @@ const app = (() => {
         }
         if(d.elv) $('enemy-lv').value = d.elv;
         
-        // スキル状態復元
         if(d.sa !== undefined) {
             skillActive = d.sa;
             const btn = $('btn-skill');
