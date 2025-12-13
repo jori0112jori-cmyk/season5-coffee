@@ -202,7 +202,6 @@ input[type="checkbox"] {
 .step-display {
     flex: 1;
     display: flex;
-    /* 【変更点】baselineからcenterに変更し、垂直方向のズレを修正 */
     align-items: center; 
     justify-content: center;
     background: #FFF;
@@ -223,7 +222,6 @@ input[type="checkbox"] {
     color: #8D6E63;
     margin-right: 4px;
     font-weight: bold;
-    /* ラベルの位置微調整（必要なら） */
     position: relative;
     top: 1px; 
 }
@@ -274,4 +272,87 @@ input[type="checkbox"] {
     opacity: 0.4;
     pointer-events: none;
     filter: grayscale(100%);
+}
+
+/* --- 討伐判定結果 --- */
+.battle-result-box {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    background: #EEE;
+    border: 2px solid #CCC;
+    color: #555;
+}
+.battle-result-box.win {
+    background: #E8F5E9;
+    border-color: #2E7D32;
+    color: #2E7D32;
+}
+.battle-result-box.lose {
+    background: #FFEBEE;
+    border-color: #C62828;
+    color: #C62828;
+}
+
+/* --- タブメニュー用CSS --- */
+.tab-menu {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+.tab-item {
+    flex: 1;
+    padding: 12px;
+    background: #D7CCC8;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    font-weight: bold;
+    color: #5D4037;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    border-bottom: 3px solid transparent;
+}
+.tab-item.active {
+    background: #FFF;
+    color: #BF360C;
+    border-bottom: 3px solid #BF360C;
+}
+.tab-content {
+    animation: fadein 0.3s;
+}
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* --- ★追加: 強化設定エリアのスタイル --- */
+.bonus-area {
+    background: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+/* --- 討伐可能ライン表示ボックス --- */
+.max-win-box {
+    background: #E8F5E9;
+    border: 1px solid #2E7D32;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.max-win-box .label {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #2E7D32;
+    margin-bottom: 6px;
+}
+.max-win-box .value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Roboto Mono', monospace;
 }
