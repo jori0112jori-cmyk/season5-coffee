@@ -1,20 +1,37 @@
 /* --- Static Data --- */
 const DEFAULT_DATA = {
-    COSTS: [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 260100, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1206300, 1326900, 1333600, 1340200, 1346900, 1353700, 1360400, 1367300, 1374100, 1381000, 1387900, 1394800, 1401800, 1408800, 1415800, 1422900, 1430000, 1437200, 1444400, 1451600, 1458800, 1466100, 1473500, 1480800, 1488200],
+    COSTS: [0, 700, 11200, 22400, 44800, 89600, 125400, 150500, 180600, 216800, 260100, 312100, 403900, 444300, 488800, 537600, 591400, 650500, 715600, 787200, 865900, 874500, 883300, 892100, 901000, 910000, 919100, 928300, 937600, 947000, 956500, 966000, 975700, 985500, 995300, 1005300, 1206300, 1326900, 1333600, 1340200, 1346900, 1353700, 1360400, 1367300, 1374100, 1381000, 1387900, 1394800, 1401800, 1408800, 1415800, 1422900, 1430000, 1436700, 1444400, 1451600, 1458800, 1466100, 1473500, 1480800, 1488200],
     VIRUS: [0, 100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8400, 8550, 8700, 8850, 9000, 9200, 9400, 9600, 9900, 10200, 10500, 10700, 10900, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 13300,18000, 23000, 28000],
+    ENEMIES: [0, 200, 400, 600, 750, 850, 1000, 1250, 1500, 1750, 2000, 2150, 2300, 2450, 2600, 2750, 2900, 3050, 3200, 3350, 3500, 3650, 3850, 4050, 4350, 4650, 4950, 5250, 5550, 5850, 6150, 6450, 6750, 6950, 7050, 7250, 7450, 7650, 7750, 7950, 8100, 8400, 8500, 8700, 8800, 9000, 9250, 9500, 9750, 10000, 10250, 10500, 10750, 11000, 11250, 11500, 11750, 12000, 12250, 12400, 12550, 12950, 13250, 13650, 13950, 14350, 14650, 15050, 15450, 15750, 16150, 16450, 16850, 17150, 17550, 17950, 18250, 18650, 18950, 19350, 19650, 20050, 20350, 20750, 21150, 21450, 21850, 22150, 22550, 22850, 23250, 23450, 23600, 23800, 24000, 24150, 24350, 24550, 24700, 24900, 25100, 25250, 25450, 25650, 25800, 26000, 26200, 26350, 26550, 26750, 26900, 27100, 27300, 27450, 27650, 27850, 28000, 28200, 28400, 28550, 28750],
+    
     TEXT: {
         ja: { 
             title: "コーヒー生産計算機", 
+            tab_main: "メイン計算",
+            tab_battle: "討伐シミュ",
+
             h_prod: "生産設定", 
             weekly: "週間配達", 
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
+            h_battle: "討伐シミュレーション (終末精鋭)", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
             lbl_lv: "Lv:",
             lbl_res: "耐性:",
+            
+            lbl_cur_buffed: "現在のステータス (バフ込)",
+            lbl_enemy_lv: "敵Lv",
+            lbl_req_res: "必要耐性",
+            lbl_skill: "戦術スキル: 悪魔狩・怪物殺し (+250)",
+            lbl_max_win: "討伐可能ライン (最大)",
+            
+            res_over: "超過",
+            res_short: "不足",
+            res_dmg: "ダメージ",
+            res_pena: "与ダメ",
 
             stock: "保有量", 
             disc: "消費減少率(%)", 
@@ -22,7 +39,7 @@ const DEFAULT_DATA = {
             r_daily: "最大生産時間(24h)", 
             r_cost: "必要量", 
             r_virus: "合計ウイルス耐性", 
-            r_short: "不足", 
+            r_short: "不足 (切り上げ)", 
             btn_save: "データ保存", 
             btn_reset: "リセット", 
             btn_now: "現在", 
@@ -33,16 +50,31 @@ const DEFAULT_DATA = {
         },
         en: { 
             title: "Coffee Calc", 
+            tab_main: "Main Calc",
+            tab_battle: "Battle Sim",
+
             h_prod: "Production", 
             weekly: "Weekly", 
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
+            h_battle: "Battle Sim (Doom Elite)",
 
             cur_lv: "Current Status",
             tgt_lv: "Target Status",
             lbl_lv: "Lv:",
             lbl_res: "Res:",
+
+            lbl_cur_buffed: "Current Status (Buffed)",
+            lbl_enemy_lv: "Enemy Lv",
+            lbl_req_res: "Req Res",
+            lbl_skill: "Tactical Skill: Monster Slayer (+250)",
+            lbl_max_win: "Max Defeatable Limit",
+
+            res_over: "Surplus",
+            res_short: "Shortage",
+            res_dmg: "Damage",
+            res_pena: "Penalty",
 
             stock: "Stock", 
             disc: "Resource Reduction(%)", 
@@ -50,7 +82,7 @@ const DEFAULT_DATA = {
             r_daily: "Max Production Time(24h)", 
             r_cost: "Required Amount", 
             r_virus: "Total Virus Resistance", 
-            r_short: "Shortage", 
+            r_short: "Shortage (Rounded Up)", 
             btn_save: "Data Save", 
             btn_reset: "Reset", 
             btn_now: "Now", 
@@ -62,9 +94,10 @@ const DEFAULT_DATA = {
     }
 };
 
-let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], TEXT: DEFAULT_DATA.TEXT };
+let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENEMIES: [...DEFAULT_DATA.ENEMIES], TEXT: DEFAULT_DATA.TEXT };
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
+while(DATA.ENEMIES.length <= 150) DATA.ENEMIES.push(0);
 
 /* --- App Logic --- */
 const app = (() => {
@@ -77,6 +110,8 @@ const app = (() => {
 
     let lang = 'ja';
     let activeBuff = 0; 
+    let skillActive = false; // 戦術スキルの状態
+    let currentTab = 'main'; 
     
     const $ = id => document.getElementById(id);
     const $$ = sel => document.querySelectorAll(sel);
@@ -111,10 +146,12 @@ const app = (() => {
                 const custom = JSON.parse(raw);
                 if(custom.COSTS) DATA.COSTS = custom.COSTS;
                 if(custom.VIRUS) DATA.VIRUS = custom.VIRUS;
+                if(custom.ENEMIES) DATA.ENEMIES = custom.ENEMIES;
             } catch(e) {}
         }
         while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
         while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
+        while(DATA.ENEMIES.length <= 150) DATA.ENEMIES.push(0);
     };
 
     const renderUI = () => {
@@ -171,6 +208,19 @@ const app = (() => {
             return;
         }
 
+        if(type === 'enemy') {
+            const el = $('enemy-lv');
+            let val = parseInt(el.value || 1);
+            val += delta;
+            if(val < 1) val = 1;
+            const maxEnemy = DATA.ENEMIES.length - 1; 
+            if(val > 120) val = 120; 
+            if(val > maxEnemy) val = maxEnemy;
+            el.value = val;
+            calc(); // 手動操作時はターゲットリセットしない
+            return;
+        }
+
         const id = `lab-${type}`;
         const el = $(id);
         if(!el) return;
@@ -192,7 +242,7 @@ const app = (() => {
         } else {
             sel.classList.add('disabled-item');
         }
-        calc();
+        calc(true); // 週間配達もバフ扱いなのでターゲット更新
     };
 
     const toggleBuffBtn = (val) => {
@@ -212,6 +262,34 @@ const app = (() => {
                 btn250.classList.remove('active');
             }
         }
+        calc(true); // バフ変更時はターゲット強制更新
+    };
+
+    // ★新規: 戦術スキルのトグル関数
+    const toggleSkill = () => {
+        skillActive = !skillActive;
+        const btn = $('btn-skill');
+        if (skillActive) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+        calc(true); // スキル変更時もターゲット強制更新
+    };
+
+    const switchTab = (tabName) => {
+        currentTab = tabName;
+        if(tabName === 'main') {
+            $('view-main').style.display = 'block';
+            $('view-battle').style.display = 'none';
+            $('tab-btn-main').classList.add('active');
+            $('tab-btn-battle').classList.remove('active');
+        } else {
+            $('view-main').style.display = 'none';
+            $('view-battle').style.display = 'block';
+            $('tab-btn-main').classList.remove('active');
+            $('tab-btn-battle').classList.add('active');
+        }
         calc();
     };
 
@@ -228,10 +306,16 @@ const app = (() => {
         
         const discVal = parseFloat($('discount').value || 0);
         if($('disp-disc')) $('disp-disc').textContent = discVal.toFixed(1);
+
+        const enemyLv = parseInt($('enemy-lv').value || 1);
+        const enemyReq = DATA.ENEMIES[enemyLv] || 0;
+        if($('disp-enemy-lv')) $('disp-enemy-lv').textContent = enemyLv;
+        if($('disp-enemy-req')) $('disp-enemy-req').textContent = enemyReq.toLocaleString();
     };
 
     // --- 計算メイン ---
-    const calc = () => {
+    // resetTarget: バフ変更時など、強制的に「次の目標」にリセットしたい場合に true を渡す
+    const calc = (resetTarget = false) => {
         updateSteppers();
 
         let hourlyProd = 0;
@@ -253,7 +337,6 @@ const app = (() => {
         const tLv = parseInt($('lab-tgt')?.value || 0);
         const rate = parseFloat($('discount')?.value || 0);
 
-        // 割引計算 (整数ベース)
         const rateInt = Math.round(rate * 10);
         const factor = 1000 - rateInt;
 
@@ -265,30 +348,101 @@ const app = (() => {
                 realCost += discountedCost;
             }
         }
-        
-        // 必要総数: 正確な数値(fmt)で表示
         $('res-cost').innerHTML = fmt(realCost);
 
         const wBonus = (weeklyActive && weeklyLv >= 1) ? 250 : 0;
         const totalBonus = wBonus + activeBuff;
-        const curVirus = (DATA.VIRUS[cLv] || 0) + totalBonus;
-        const tgtVirus = (DATA.VIRUS[tLv] || 0) + totalBonus;
-        $('res-virus').textContent = `${fmt(curVirus)} → ${fmt(tgtVirus)}`;
+        const curVirusBase = DATA.VIRUS[cLv] || 0;
+        const curVirusTotal = curVirusBase + totalBonus;
+        
+        const tgtVirusBase = DATA.VIRUS[tLv] || 0;
+        const tgtVirusTotal = tgtVirusBase + totalBonus;
+
+        $('res-virus').textContent = `${fmt(curVirusTotal)} → ${fmt(tgtVirusTotal)}`;
+
+        // ★討伐シミュレーション計算
+        const skillBonus = skillActive ? 250 : 0;
+        const battleVirusTotal = curVirusTotal + skillBonus;
+
+        if($('disp-battle-my-lv')) $('disp-battle-my-lv').textContent = cLv;
+        if($('disp-battle-my-res')) $('disp-battle-my-res').textContent = fmt(battleVirusTotal);
+
+        // --- 討伐可能ライン（最大レベル）計算 ---
+        let maxWinLv = 0;
+        let maxWinReq = 0;
+        for (let i = 1; i < DATA.ENEMIES.length; i++) {
+            if (DATA.ENEMIES[i] <= battleVirusTotal) {
+                maxWinLv = i;
+                maxWinReq = DATA.ENEMIES[i];
+            } else {
+                break;
+            }
+        }
+        if ($('disp-max-win-lv')) $('disp-max-win-lv').textContent = maxWinLv;
+        if ($('disp-max-win-res')) $('disp-max-win-res').textContent = fmt(maxWinReq);
+
+        // --- ★ターゲット自動更新ロジック ---
+        // 1. バフ変更などのアクション時 (resetTarget=true) は強制的に「次の目標」にセット
+        // 2. 現在の選択が「すでに倒せる敵」以下になってしまった場合も「次の目標」に引き上げ
+        let enemyLv = parseInt($('enemy-lv').value || 1);
+        const nextTargetLv = maxWinLv + 1;
+        const safeNextTarget = (nextTargetLv < DATA.ENEMIES.length) ? nextTargetLv : (DATA.ENEMIES.length - 1);
+
+        if (resetTarget || enemyLv <= maxWinLv) {
+            enemyLv = safeNextTarget;
+            $('enemy-lv').value = enemyLv;
+        }
+        
+        const enemyReq = DATA.ENEMIES[enemyLv] || 0;
+        if($('disp-enemy-lv')) $('disp-enemy-lv').textContent = enemyLv;
+        if($('disp-enemy-req')) $('disp-enemy-req').textContent = fmt(enemyReq);
+        // -----------------------------------------------------
+
+        const battleStatus = $('battle-status');
+        const battleDetail = $('battle-detail');
+        const box = $('battle-result');
+
+        if (enemyReq === 0) {
+             battleStatus.textContent = "";
+             battleDetail.textContent = "";
+             box.className = "battle-result-box";
+        } else if (battleVirusTotal >= enemyReq) {
+            battleStatus.textContent = ""; 
+            const txtOver = DATA.TEXT[lang].res_over;
+            battleDetail.innerHTML = `<span style="color:#2E7D32; font-weight:bold;">${txtOver}: +${fmt(battleVirusTotal - enemyReq)}</span>`;
+            box.className = "battle-result-box win";
+        } else {
+            battleStatus.textContent = "";
+            const diff = enemyReq - battleVirusTotal;
+            const rawRatio = diff / enemyReq;
+            const percentCeiled = Math.ceil(rawRatio * 100);
+            
+            const penaltyPercent = percentCeiled * 2;
+            let damageRate = 100 - penaltyPercent;
+            if (damageRate < 0) damageRate = 0;
+
+            const txtShort = DATA.TEXT[lang].res_short;
+            const txtDmg = DATA.TEXT[lang].res_dmg;
+            const txtPena = DATA.TEXT[lang].res_pena;
+
+            battleDetail.innerHTML = `
+                ${txtShort}: ${fmt(diff)}<br>
+                <div style="margin-top:4px; font-weight:bold; color:#C62828;">
+                    ${txtDmg}: ${damageRate}% (${txtPena}: -${penaltyPercent}%)
+                </div>
+            `;
+            box.className = "battle-result-box lose";
+        }
 
         const stock = parseStock($('stock')?.value || 0);
         let shortage = Math.max(0, realCost - stock);
         
-        // 【修正】不足分の丸め処理 (安全策)
-        // 1000で割って切り上げ、1000を掛ける (例: 401,480 -> 402,000)
         let safeShortage = 0;
         if (shortage > 0) {
             safeShortage = Math.ceil(shortage / 1000) * 1000;
         }
 
-        // 不足表示: K/M表記 (fmtKM) を使用
         $('res-short').innerHTML = fmtKM(safeShortage, true);
-
-        // 時間計算は「安全策で丸めた不足分」を元に行う
         updateStatus(safeShortage, hourlyProd);
     };
 
@@ -327,8 +481,6 @@ const app = (() => {
     const fmt = n => n.toLocaleString();
     const pz = n => String(n).padStart(2, '0');
     
-    // 【修正】K,M単位のフォーマット関数
-    // parseFloat(...) を通すことで "402.00" -> 402 になり、不要な小数を削除
     const fmtKM = (n, detailed=false) => {
         if(n >= 1000000) return parseFloat((n/1000000).toFixed(2)) + '<span class="unit">M</span>';
         if(n >= 1000) return parseFloat((n/1000).toFixed(2)) + '<span class="unit">K</span>';
@@ -361,7 +513,9 @@ const app = (() => {
             lt: $('lab-tgt').value,
             st: $('stock').value,
             ds: $('discount').value,
-            bf: activeBuff
+            bf: activeBuff,
+            elv: $('enemy-lv').value,
+            sa: skillActive // スキル状態保存
         };
         localStorage.setItem(CONFIG.SAVE_KEY, JSON.stringify(data));
         alert(lang === 'ja' ? '保存しました' : 'Saved');
@@ -393,6 +547,15 @@ const app = (() => {
             const btn500 = $('btn-buff-500');
             if(activeBuff === 250 && btn250) btn250.classList.add('active');
             if(activeBuff === 500 && btn500) btn500.classList.add('active');
+        }
+        if(d.elv) $('enemy-lv').value = d.elv;
+        
+        // スキル状態復元
+        if(d.sa !== undefined) {
+            skillActive = d.sa;
+            const btn = $('btn-skill');
+            if(skillActive) btn.classList.add('active');
+            else btn.classList.remove('active');
         }
     };
 
@@ -426,6 +589,7 @@ const app = (() => {
             p.style.display = 'block';
             $('admin-costs').value = DATA.COSTS.join(', ');
             $('admin-virus').value = DATA.VIRUS.join(', ');
+            $('admin-enemies').value = DATA.ENEMIES.join(', ');
         } else {
             p.style.display = 'none';
         }
@@ -434,9 +598,13 @@ const app = (() => {
         try {
             const strCost = $('admin-costs').value;
             const strVirus = $('admin-virus').value;
+            const strEnemies = $('admin-enemies').value;
+            
             const newCosts = strCost.split(',').map(s => parseInt(s.trim()) || 0);
             const newVirus = strVirus.split(',').map(s => parseInt(s.trim()) || 0);
-            const customData = { COSTS: newCosts, VIRUS: newVirus };
+            const newEnemies = strEnemies.split(',').map(s => parseInt(s.trim()) || 0);
+            
+            const customData = { COSTS: newCosts, VIRUS: newVirus, ENEMIES: newEnemies };
             localStorage.setItem(CONFIG.DATA_KEY, JSON.stringify(customData));
             alert('Updated. Reloading...');
             location.reload();
@@ -452,7 +620,7 @@ const app = (() => {
     return { 
         init, calc, save, reset, setLang, setNow, onCurChange, 
         toggleAdmin, saveAdmin, resetAdmin, 
-        toggleBuffBtn, step, toggleWeekly
+        toggleBuffBtn, step, toggleWeekly, switchTab, toggleSkill
     };
 })();
 
