@@ -99,7 +99,7 @@ const DEFAULT_DATA = {
 let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENEMIES: [...DEFAULT_DATA.ENEMIES], TEXT: DEFAULT_DATA.TEXT };
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
-while(DATA.ENEMIES.length <= 150) DATA.ENEMIES.push(0);
+while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
 
 /* --- App Logic --- */
 const app = (() => {
