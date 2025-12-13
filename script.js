@@ -32,7 +32,7 @@ const DEFAULT_DATA = {
             res_over: "超過",
             res_short: "不足",
             res_dmg: "ダメージ",
-            res_pena: "ペナルティ",
+            res_pena: "与ダメ",
 
             stock: "保有量", 
             disc: "消費減少率(%)", 
