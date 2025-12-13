@@ -30,8 +30,7 @@
                 <span data-t="h_prod">生産設定</span>
                 <span id="total-prod" class="font-mono text-primary" style="font-size:1.1rem;">0/h</span>
             </h2>
-            <div class="grid cols-4" id="factory-area">
-                </div>
+            <div class="grid cols-4" id="factory-area"></div>
             <div class="grid cols-2 mt-md">
                 <div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -167,7 +166,7 @@
             </div>
 
             <div class="bonus-area">
-                <label style="text-align:center; margin-bottom:8px; font-size:0.9rem; color:#5D4037;">強化設定 (Buff & Skill)</label>
+                <label style="text-align:center; margin-bottom:8px; font-size:0.9rem; color:#5D4037;" data-t="lbl_bonus">強化設定 (Buff & Skill)</label>
                 
                 <div class="buff-group" style="margin-bottom:12px;">
                     <div class="buff-chip" id="btn-buff-250" onclick="app.toggleBuffBtn(250)">
@@ -199,7 +198,7 @@
             <hr style="margin: 20px 0; border:0; border-top:1px dashed #CCC;">
 
             <div style="margin-bottom: 12px;">
-                <label style="text-align:center;"><span data-t="lbl_enemy_lv">敵Lv</span> & <span data-t="lbl_req_res">必要耐性</span> </label>
+                <label style="text-align:center;"><span data-t="lbl_enemy_lv">敵Lv</span> & <span data-t="lbl_req_res">必要耐性</span> (個別判定)</label>
                 <div class="stepper-ctrl">
                     <button class="step-btn" onclick="app.step('enemy', -1)">－</button>
                     <div class="step-display">
@@ -220,7 +219,6 @@
             </div>
         </div>
     </div>
-
 
     <div style="margin-top: 30px; text-align: center;">
         <button onclick="app.toggleAdmin()" style="background:none; border:none; color:#999; text-decoration:underline; font-size:0.8rem; cursor:pointer;">
