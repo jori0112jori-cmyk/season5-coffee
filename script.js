@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション (終末精鋭)", 
+            h_battle: "討伐シミュレーション (敵)", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -32,7 +32,7 @@ const DEFAULT_DATA = {
             res_over: "超過",
             res_short: "不足",
             res_dmg: "ダメージ",
-            res_pena: "与ダメ",
+            res_pena: "ペナルティ",
 
             stock: "保有量", 
             disc: "消費減少率(%)", 
@@ -40,7 +40,7 @@ const DEFAULT_DATA = {
             r_daily: "最大生産時間(24h)", 
             r_cost: "必要量", 
             r_virus: "合計ウイルス耐性", 
-            r_short: "不足 (切り上げ)", 
+            r_short: "不足 (安全策:切り上げ)", 
             btn_save: "データ保存", 
             btn_reset: "リセット", 
             btn_now: "現在", 
@@ -59,7 +59,7 @@ const DEFAULT_DATA = {
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
-            h_battle: "Battle Sim (Doom Elite)",
+            h_battle: "Battle Sim (Enemy)",
 
             cur_lv: "Current Status",
             tgt_lv: "Target Status",
@@ -97,8 +97,10 @@ const DEFAULT_DATA = {
 };
 
 let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENEMIES: [...DEFAULT_DATA.ENEMIES], TEXT: DEFAULT_DATA.TEXT };
+// 配列の安全確保
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
+// Lv120まで確保
 while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
 
 /* --- App Logic --- */
@@ -153,7 +155,7 @@ const app = (() => {
         }
         while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
         while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
-        while(DATA.ENEMIES.length <= 150) DATA.ENEMIES.push(0);
+        while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
     };
 
     const renderUI = () => {
@@ -215,9 +217,13 @@ const app = (() => {
             let val = parseInt(el.value || 1);
             val += delta;
             if(val < 1) val = 1;
-            const maxEnemy = DATA.ENEMIES.length - 1; 
-            if(val > 120) val = 120; 
-            if(val > maxEnemy) val = maxEnemy;
+            
+            // ★修正: 耐性が0でない（有効な）最大レベルを探す
+            let realMax = DATA.ENEMIES.findLastIndex(v => v > 0);
+            if (realMax === -1) realMax = DATA.ENEMIES.length - 1;
+
+            if(val > realMax) val = realMax;
+            
             el.value = val;
             calc();
             return;
@@ -369,7 +375,11 @@ const app = (() => {
         // --- 討伐可能ライン（最大レベル）計算 ---
         let maxWinLv = 0;
         let maxWinReq = 0;
+        
+        // ★修正: 耐性0のデータ（枠だけあって中身がない）は無視する
         for (let i = 1; i < DATA.ENEMIES.length; i++) {
+            if (DATA.ENEMIES[i] === 0) break; // <-- これで121以降の0を無視
+
             if (DATA.ENEMIES[i] <= battleVirusTotal) {
                 maxWinLv = i;
                 maxWinReq = DATA.ENEMIES[i];
@@ -383,7 +393,12 @@ const app = (() => {
         // --- ターゲット自動更新ロジック ---
         let enemyLv = parseInt($('enemy-lv').value || 1);
         const nextTargetLv = maxWinLv + 1;
-        const safeNextTarget = (nextTargetLv < DATA.ENEMIES.length) ? nextTargetLv : (DATA.ENEMIES.length - 1);
+        
+        // 有効な最大レベル(120)を超えないようにする
+        let realMax = DATA.ENEMIES.findLastIndex(v => v > 0);
+        if (realMax === -1) realMax = DATA.ENEMIES.length - 1;
+        
+        const safeNextTarget = (nextTargetLv <= realMax) ? nextTargetLv : realMax;
 
         if (resetTarget || enemyLv <= maxWinLv) {
             enemyLv = safeNextTarget;
@@ -418,7 +433,6 @@ const app = (() => {
             let damageRate = 100 - penaltyPercent;
             if (damageRate < 0) damageRate = 0;
 
-            // ★変更点: ペナルティ表示のキャップ処理 (-99.9%)
             let displayPenalty = penaltyPercent;
             if (displayPenalty >= 100) displayPenalty = 99.9;
 
