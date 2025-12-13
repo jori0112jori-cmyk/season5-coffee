@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション (敵)", 
+            h_battle: "討伐シミュレーション (終末精鋭)", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -26,7 +26,7 @@ const DEFAULT_DATA = {
             lbl_next_target: "次の目標 (NEXT TARGET)",
             lbl_req_res: "必要耐性",
             lbl_skill: "戦術スキル: 悪魔狩・怪物殺し (+250)",
-            lbl_max_win: "討伐可能ライン (最大)",
+            lbl_max_win: "討伐可能ライン (安全)",
             lbl_bonus: "強化設定 (Buff & Skill)",
             
             res_over: "超過",
@@ -40,7 +40,7 @@ const DEFAULT_DATA = {
             r_daily: "最大生産時間(24h)", 
             r_cost: "必要量", 
             r_virus: "合計ウイルス耐性", 
-            r_short: "不足 (安全策:切り上げ)", 
+            r_short: "不足 (切り上げ)", 
             btn_save: "データ保存", 
             btn_reset: "リセット", 
             btn_now: "現在", 
