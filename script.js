@@ -7,7 +7,7 @@ const DEFAULT_DATA = {
     TEXT: {
         ja: { 
             title: "コーヒー生産計算機", 
-            tab_main: "生産計算",
+            tab_main: "生産計算", 
             tab_battle: "討伐シミュレータ",
 
             h_prod: "生産設定", 
@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション (敵)", 
+            h_battle: "討伐シミュレーション ", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -23,12 +23,12 @@ const DEFAULT_DATA = {
             lbl_res: "耐性:",
             
             lbl_cur_buffed: "現在のステータス (バフ込)",
-            // ★変更点: 一括翻訳用のキー
-            lbl_indiv_check: "終末精鋭Lv & 必要耐性 (個別判定)",
-            
+            lbl_next_target: "次の目標 (NEXT TARGET)",
+            lbl_req_res: "必要耐性",
             lbl_skill: "戦術スキル: 悪魔狩・怪物殺し +250",
             lbl_max_win: "討伐可能ライン (最大)",
             lbl_bonus: "強化設定 (Buff & Skill)",
+            lbl_indiv_check: "終末精鋭Lv & 必要耐性 (個別判定)",
             
             res_over: "超過",
             res_short: "不足",
@@ -60,7 +60,7 @@ const DEFAULT_DATA = {
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
-            h_battle: "Battle Sim (Enemy)",
+            h_battle: "Battle Sim ",
 
             cur_lv: "Current Status",
             tgt_lv: "Target Status",
@@ -68,12 +68,12 @@ const DEFAULT_DATA = {
             lbl_res: "Res:",
 
             lbl_cur_buffed: "Current Status (Buffed)",
-            // ★変更点: 一括翻訳用のキー
-            lbl_indiv_check: "Doom Elite Lv & Req Res (Individual)",
-            
-            lbl_skill: "Tactical Skill: Monster Slayer +250",
+            lbl_enemy_lv: "Doom Elite Lv",
+            lbl_req_res: "Req Res",
+            lbl_skill: "Tactical Skill: Monster Slayer (+250)",
             lbl_max_win: "Max Defeatable Limit",
             lbl_bonus: "Bonus Settings (Buff & Skill)",
+            lbl_indiv_check: "Enemy Lv & Req Res (Individual)",
 
             res_over: "Surplus",
             res_short: "Shortage",
@@ -99,10 +99,8 @@ const DEFAULT_DATA = {
 };
 
 let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENEMIES: [...DEFAULT_DATA.ENEMIES], TEXT: DEFAULT_DATA.TEXT };
-// 配列の安全確保
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
-// Lv120まで確保
 while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
 
 /* --- App Logic --- */
@@ -141,7 +139,7 @@ const app = (() => {
             }, 50);
         } catch(err) {
             console.error("Init Error:", err);
-            alert("初期化エラーが発生しました。リセットボタンを押すか、キャッシュをクリアしてください。");
+            alert("初期化エラー");
         }
     };
 
@@ -592,8 +590,12 @@ const app = (() => {
         }
     };
 
+    // ★改善: リセット時に確認ダイアログを表示
     const reset = () => {
-        if(confirm('Reset?')) { localStorage.removeItem(CONFIG.SAVE_KEY); location.reload(); }
+        if(confirm('設定をリセットしますか？\n(OK=通常リセット / キャンセル=中断)')) { 
+            localStorage.removeItem(CONFIG.SAVE_KEY); 
+            location.reload(); 
+        }
     };
 
     const setLang = (l) => {
