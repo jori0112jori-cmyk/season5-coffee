@@ -23,6 +23,12 @@ body {
 
 .container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
 
+/* --- Utility Classes --- */
+.mb-sm { margin-bottom: 8px; }
+.mb-md { margin-bottom: 12px; }
+.mb-lg { margin-bottom: 20px; }
+.text-center { text-align: center; }
+
 /* --- Typography --- */
 h1 { font-size: 1.2rem; color: var(--c-primary); margin: 0; line-height: 1.2; }
 .subtitle { font-size: 0.75rem; color: #5D4037; font-weight: normal; display: block; }
@@ -142,7 +148,13 @@ input[type="checkbox"] {
 .btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: #fff; cursor: pointer; font-size: 0.9rem; transition: transform 0.1s, box-shadow 0.1s; }
 .btn-save { background: var(--c-primary); }
 .btn-reset { background: var(--c-btn); }
-.btn:active { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+
+/* ★改善: クリック時のアニメーション */
+.btn:active, .step-btn:active, .buff-chip:active, .tab-item:active {
+    transform: scale(0.96);
+    transition: transform 0.05s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
 
 .time-wrapper { display: flex; gap: 8px; }
 .btn-now {
@@ -195,27 +207,23 @@ input[type="checkbox"] {
     user-select: none;
     transition: background 0.1s;
 }
-.step-btn:active {
-    background: #D7CCC8;
-}
 
-/* ★修正箇所: 中央寄せをやめて、ベースライン揃えに変更 */
 .step-display {
     flex: 1;
     display: flex;
-    align-items: baseline; /* 文字の底辺を揃える */
+    align-items: baseline; 
     justify-content: center;
     background: #FFF;
     border: 1px solid var(--c-border);
     border-radius: 8px;
-    min-height: 44px; /* 高さを固定せず最小値に */
-    padding: 10px 5px; /* 上下のパディングで中央に見せる */
+    min-height: 44px;
+    padding: 10px 5px;
     font-family: 'Roboto Mono', monospace;
     font-size: 1.1rem;
     cursor: default;
     user-select: none;
     white-space: nowrap;
-    box-sizing: border-box; /* パディングを含める */
+    box-sizing: border-box;
 }
 
 /* 数値表示用 */
@@ -224,11 +232,10 @@ input[type="checkbox"] {
     color: #8D6E63;
     margin-right: 4px;
     font-weight: bold;
-    /* position: relative; top: 1px;  <- ズレの原因になるので削除 */
 }
 .sub-sep {
     display: inline-block;
-    width: 12px; /* 間隔 */
+    width: 12px;
 }
 
 .val-lv { font-weight: bold; color: #3E2723; }
@@ -297,6 +304,9 @@ input[type="checkbox"] {
     background: #EEE;
     border: 2px solid #CCC;
     color: #555;
+    /* ★改善: フォントを等幅にして数字を読みやすく */
+    font-family: 'Roboto Mono', monospace;
+    line-height: 1.6;
 }
 .battle-result-box.win {
     background: #E8F5E9;
@@ -313,7 +323,6 @@ input[type="checkbox"] {
 .tab-menu {
     display: flex;
     gap: 5px;
-    margin-bottom: 15px;
 }
 .tab-item {
     flex: 1;
@@ -366,7 +375,7 @@ input[type="checkbox"] {
 }
 .max-win-box .value {
     display: flex;
-    align-items: baseline; /* ここもベースライン揃えに */
+    align-items: baseline; 
     justify-content: center;
     font-family: 'Roboto Mono', monospace;
 }
