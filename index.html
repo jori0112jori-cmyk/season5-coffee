@@ -1,259 +1,433 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LastWar S5 Coffee Calc</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+:root {
+    /* 配色設定 */
+    --c-primary: #4E342E;
+    --c-bg:      #EFEBE9;
+    --c-card:    #FFFFFF;
+    --c-text:    #3E2723;
+    --c-border:  #D7CCC8;
+    --c-accent:  #BF360C;
+    --c-btn:     #8D6E63;
+    --c-shadow:  rgba(62, 39, 35, 0.1);
+}
 
-<div class="container">
-    <header>
-        <h1><span data-t="title">コーヒー生産計算機</span> <span class="subtitle">LastWar S5 Coffee Calc</span></h1>
-        <div class="lang-switch">
-            <img src="https://flagcdn.com/w80/jp.png" class="flag-icon active" onclick="app.setLang('ja')" alt="JP">
-            <img src="https://flagcdn.com/w80/us.png" class="flag-icon" onclick="app.setLang('en')" alt="EN">
-        </div>
-    </header>
+/* --- Base Styles --- */
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    margin: 0;
+    padding: 15px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+}
 
-    <div class="tab-menu mb-md">
-        <button id="tab-btn-main" class="tab-item active" onclick="app.switchTab('main')" data-t="tab_main">メイン計算</button>
-        <button id="tab-btn-battle" class="tab-item" onclick="app.switchTab('battle')" data-t="tab_battle">討伐シミュ</button>
-    </div>
+.container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
 
-    <div id="view-main" class="tab-content">
-        
-        <div class="card">
-            <h2>
-                <span data-t="h_prod">生産設定</span>
-                <span id="total-prod" class="font-mono text-primary" style="font-size:1.1rem;">0/h</span>
-            </h2>
-            <div class="grid cols-4" id="factory-area"></div>
-            <div class="grid cols-2 mt-md">
-                <div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <label data-t="weekly" style="margin-bottom:0;">週間配達</label>
-                        <input type="checkbox" id="weekly-active" onchange="app.toggleWeekly()" checked 
-                               style="width:20px; height:20px; margin:0; cursor:pointer;">
-                    </div>
-                    <select id="weekly-lv" onchange="app.calc()" style="transition: opacity 0.2s;"></select>
-                </div>
-                
-                <div>
-                    <label style="white-space: nowrap;">
-                        <span data-t="time">現在時刻</span>
-                        <span id="now-date" style="margin-left: 8px; color: #5D4037; font-weight: bold;"></span>
-                    </label>
-                    <div class="time-wrapper">
-                        <input type="time" id="now-time" onchange="app.calc()">
-                        <button class="btn-now" onclick="app.setNow()" data-t="btn_now">現在</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+/* --- Utility Classes --- */
+.mb-sm { margin-bottom: 8px; }
+.mb-md { margin-bottom: 12px; }
+.mb-lg { margin-bottom: 20px; }
+.text-center { text-align: center; }
 
-        <div class="card">
-            <h2 data-t="h_status">目標設定（カフェイン研究所）</h2>
-            
-            <div class="mb-md">
-                <label data-t="cur_lv" class="text-center">現在ステータス</label>
-                <div class="stepper-ctrl">
-                    <button class="step-btn" onclick="app.step('cur', -1)">－</button>
-                    <div class="step-display">
-                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
-                        <span id="disp-cur-lv" class="val-lv">0</span>
-                        <span class="sub-sep"></span>
-                        <span class="sub-label" data-t="lbl_res">耐性:</span>
-                        <span id="disp-cur-res" class="val-res">0</span>
-                    </div>
-                    <button class="step-btn" onclick="app.step('cur', 1)">＋</button>
-                </div>
-                <select id="lab-cur" style="display:none;"></select>
-            </div>
+/* --- Typography --- */
+h1 { font-size: 1.2rem; color: var(--c-primary); margin: 0; line-height: 1.2; }
+.subtitle { font-size: 0.75rem; color: #5D4037; font-weight: normal; display: block; }
 
-            <div class="mb-md">
-                <label data-t="tgt_lv" class="text-center">目標ステータス</label>
-                <div class="stepper-ctrl">
-                    <button class="step-btn" onclick="app.step('tgt', -1)">－</button>
-                    <div class="step-display">
-                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
-                        <span id="disp-tgt-lv" class="val-lv">0</span>
-                        <span class="sub-sep"></span>
-                        <span class="sub-label" data-t="lbl_res">耐性:</span>
-                        <span id="disp-tgt-res" class="val-res">0</span>
-                    </div>
-                    <button class="step-btn" onclick="app.step('tgt', 1)">＋</button>
-                </div>
-                <select id="lab-tgt" style="display:none;"></select>
-            </div>
+h2 { 
+    font-size: 1rem; margin: 0 0 12px 0; color: var(--c-primary); 
+    border-bottom: 2px solid var(--c-border); padding-bottom: 6px; 
+    display: flex; justify-content: space-between; align-items: flex-end; 
+}
 
-            <div class="grid cols-2">
-                <div>
-                    <label data-t="stock">保有量</label>
-                    <input type="text" inputmode="decimal" id="stock" placeholder="0 (1K, 1M...)" 
-                           onfocus="this.select()" oninput="app.calc()" 
-                           enterkeyhint="done">
-                </div>
-                <div>
-                    <label data-t="disc">割引率 (%)</label>
-                    <div class="stepper-ctrl">
-                        <button class="step-btn" onclick="app.step('disc', -0.5)">－</button>
-                        <div class="step-display">
-                            <span id="disp-disc" class="val-lv">0.0</span>
-                            <span class="val-sep">%</span>
-                        </div>
-                        <button class="step-btn" onclick="app.step('disc', 0.5)">＋</button>
-                    </div>
-                    <input type="hidden" id="discount" value="0">
-                </div>
-            </div>
-        </div>
+.font-mono { font-family: 'Roboto Mono', monospace; }
+.text-accent { color: var(--c-accent); }
+.text-primary { color: var(--c-primary); }
 
-        <div class="card result-card">
-            <h2 data-t="h_res">計算結果</h2>
-            <div class="res-row">
-                <span data-t="r_daily">日産 (24h)</span>
-                <span class="res-val" id="res-daily">0</span>
-            </div>
-            <div class="res-row">
-                <span data-t="r_cost">必要総数</span>
-                <span class="res-val" id="res-cost">0</span>
-            </div>
-            <div class="res-row">
-                <span data-t="r_virus" style="font-size:0.9rem;">ウイルス耐性 (バフ込)</span>
-                <span class="res-val" id="res-virus">0 → 0</span>
-            </div>
-            
-            <div class="highlight-box">
-                <div id="status-msg" style="font-weight:bold; font-size:0.9rem;">入力待ち</div>
-                
-                <span class="big-time font-mono" id="res-time">--:--</span>
-                <span class="big-date" id="res-date">--/--</span>
-                
-                <div class="shortage-area">
-                    <span data-t="r_short" style="font-size:0.85rem; font-weight:bold;">不足</span>
-                    <span id="res-short" class="font-mono" style="font-size:1.3rem; font-weight:900;">0</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="btn-group">
-            <button class="btn btn-save" onclick="app.save()" data-t="btn_save">設定を保存</button>
-            <button class="btn btn-reset" onclick="app.reset()" data-t="btn_reset">リセット</button>
-        </div>
-    </div>
+/* --- Components --- */
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+
+.card {
+    background: var(--c-card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px var(--c-shadow);
+    border: 1px solid var(--c-border);
+}
+
+.card.result-card { background: #EFEBE9; border: 2px solid #8D6E63; box-shadow: 0 4px 12px rgba(62, 39, 35, 0.15); }
+.res-val {
+    font-family: 'Roboto Mono'; font-weight: 700; font-size: 1.1rem; color: var(--c-primary);
+    background: rgba(255,255,255,0.5); 
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* --- Forms & Inputs --- */
+label { 
+    display: block; font-size: 0.9rem; font-weight: bold; color: var(--c-primary);
+    margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+}
+
+/* チェックボックス以外のinputとselect */
+select, input:not([type="checkbox"]) {
+    width: 100%; padding: 12px;
+    border: 1px solid var(--c-border); border-radius: 8px;
+    font-size: 16px; background: #FAFAFA; box-sizing: border-box;
+    color: var(--c-text); appearance: none;
+}
+select:focus, input:not([type="checkbox"]):focus {
+    border-color: var(--c-accent);
+    background: #FFF;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(191, 54, 12, 0.2);
+}
+
+/* チェックボックス専用スタイル */
+input[type="checkbox"] {
+    appearance: auto;           
+    -webkit-appearance: auto;   
+    accent-color: var(--c-accent);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* 保有量入力欄 (#stock) - 上下配置用に修正 */
+#stock {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    height: 44px;
+    padding: 0 10px;
+    /* 下側の角を直角にして、下のボタンと繋がっているように見せる */
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none; /* 下線を消す */
+    margin-bottom: 0;
+}
+#stock::placeholder {
+    font-weight: normal;
+    font-size: 1rem;
+    opacity: 0.6;
+}
+
+/* ★追加: 入力欄とツールボタンのグルーピング */
+.stock-input-group {
+    display: flex;
+    flex-direction: column; /* 縦に積む */
+}
+
+/* ボタン群のラッパー */
+.stock-tools {
+    display: flex;
+    width: 100%;
+}
+
+.unit-btn {
+    flex: 1; /* 3等分 */
+    height: 40px;
+    background: #D7CCC8;
+    color: #5D4037;
+    border: 1px solid #A1887F;
+    border-right: none; /* 隣り合う線の重複を防ぐ */
+    font-weight: bold;
+    font-family: 'Roboto Mono', monospace;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+    font-size: 1rem;
+}
+/* 左下の角を丸く */
+.unit-btn:first-child {
+    border-bottom-left-radius: 8px;
+}
+/* 右下の角を丸く、右線を復活 */
+.unit-btn:last-child {
+    border-bottom-right-radius: 8px;
+    border-right: 1px solid #A1887F;
+}
+
+.unit-btn:hover { background: #BCAAA4; }
+.unit-btn:active { background: #8D6E63; color: #FFF; }
+
+/* 削除ボタンを少し強調 */
+.del-btn {
+    font-size: 1.2rem;
+    color: #8D6E63;
+}
 
 
-    <div id="view-battle" class="tab-content" style="display:none;">
-        <div class="card">
-            <h2 data-t="h_battle">討伐シミュレーション (敵)</h2>
-            
-            <div class="mb-md">
-                <label class="text-center" data-t="lbl_cur_buffed">現在のステータス (バフ込)</label>
-                <div class="stepper-ctrl">
-                    <button class="step-btn" onclick="app.step('cur', -1)">－</button>
-                    <div class="step-display">
-                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
-                        <span id="disp-battle-my-lv" class="val-lv">0</span>
-                        <span class="sub-sep"></span>
-                        <span class="sub-label" data-t="lbl_res">耐性:</span>
-                        <span id="disp-battle-my-res" class="val-res">0</span>
-                    </div>
-                    <button class="step-btn" onclick="app.step('cur', 1)">＋</button>
-                </div>
-            </div>
+/* --- Grid Layouts --- */
+.grid { display: grid; gap: 12px; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.mt-md { margin-top: 15px; }
 
-            <div class="bonus-area">
-                <label class="text-center mb-md" style="color:#5D4037; font-size:0.9rem;" data-t="lbl_bonus">強化設定 (Buff & Skill)</label>
-                
-                <div class="buff-group mb-md">
-                    <div class="buff-chip" id="btn-buff-250" onclick="app.toggleBuffBtn(250)">
-                        <span>☕ +250</span>
-                    </div>
-                    <div class="buff-chip" id="btn-buff-500" onclick="app.toggleBuffBtn(500)">
-                        <span>☕ +500</span>
-                    </div>
-                </div>
+@media (max-width: 600px) {
+    .cols-4 { grid-template-columns: 1fr 1fr; }
+}
 
-                <div class="buff-group">
-                    <div class="buff-chip" id="btn-skill" onclick="app.toggleSkill()">
-                        <span data-t="lbl_skill">戦術スキル (+250)</span>
-                    </div>
-                </div>
-            </div>
+/* --- Values & Results --- */
+.res-row { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 6px 0; border-bottom: 1px dashed rgba(62, 39, 35, 0.15); 
+}
+.res-row:last-child { border: none; }
 
-            <div class="max-win-box">
-                <div class="label" data-t="lbl_max_win">討伐可能ライン (最大)</div>
-                <div class="value">
-                    <span class="sub-label">Lv:</span>
-                    <span id="disp-max-win-lv" style="font-size:1.4rem; font-weight:bold; color:#2E7D32;">-</span>
-                    <span class="sub-sep" style="width:10px;"></span>
-                    <span class="sub-label" data-t="lbl_res">耐性:</span>
-                    <span id="disp-max-win-res" style="font-size:1.2rem; font-weight:bold; color:#007AFF;">-</span>
-                </div>
-            </div>
+.highlight-box {
+    background: #FFF; border-radius: 8px; padding: 15px; text-align: center;
+    margin-top: 12px; border: 2px solid var(--c-accent);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
 
-            <hr class="mb-lg" style="border:0; border-top:1px dashed #CCC;">
+.big-time { 
+    font-size: 2.6rem; font-weight: 900; color: var(--c-accent); 
+    line-height: 1; margin: 2px 0 0 0; letter-spacing: -1px;
+}
+.big-date { font-size: 1.2rem; font-weight: bold; color: #5D4037; margin-bottom: 8px; }
 
-            <div class="mb-md">
-                <label class="text-center" data-t="lbl_indiv_check">敵Lv & 必要耐性 (個別判定)</label>
-                
-                <div class="stepper-ctrl">
-                    <button class="step-btn" onclick="app.step('enemy', -1)">－</button>
-                    <div class="step-display">
-                        <span class="sub-label" data-t="lbl_lv">Lv:</span>
-                        <span id="disp-enemy-lv" class="val-lv">1</span>
-                        <span class="sub-sep"></span>
-                        <span class="sub-label" data-t="lbl_res">耐性:</span>
-                        <span id="disp-enemy-req" class="val-res" style="color:#D32F2F;">0</span>
-                    </div>
-                    <button class="step-btn" onclick="app.step('enemy', 1)">＋</button>
-                </div>
-                <input type="hidden" id="enemy-lv" value="1">
-            </div>
-            
-            <div id="battle-result" class="battle-result-box">
-                <span id="battle-status" style="font-size:1.5rem; font-weight:900;"></span>
-                <div id="battle-detail" style="font-size:0.9rem;"></div>
-            </div>
-        </div>
-    </div>
+.shortage-area {
+    background: #FBE9E7; border-radius: 6px; padding: 6px 12px;
+    display: flex; align-items: baseline; gap: 6px; color: var(--c-accent);
+}
 
-    <div style="margin-top: 30px; text-align: center;">
-        <button onclick="app.toggleAdmin()" style="background:none; border:none; color:#999; text-decoration:underline; font-size:0.8rem; cursor:pointer;">
-            管理者モード (データ編集)
-        </button>
-    </div>
+/* --- Buttons --- */
+.btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.btn { padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: #fff; cursor: pointer; font-size: 0.9rem; transition: transform 0.1s, box-shadow 0.1s; }
+.btn-save { background: var(--c-primary); }
+.btn-reset { background: var(--c-btn); }
 
-    <div id="admin-panel" class="card" style="display:none; margin-top:10px; border: 2px solid #ccc; background: #fff;">
-        <h3 style="margin-top:0;">データ編集</h3>
-        <p style="font-size:0.8rem; color:#666;">カンマ区切りで数値を入力してください。</p>
-        
-        <div class="mb-md">
-            <label style="display:block; font-weight:bold;">必要量 (Required Amount)</label>
-            <textarea id="admin-costs" style="width:100%; height:80px; font-family:monospace; font-size:0.8rem;"></textarea>
-        </div>
+/* クリック時のアニメーション */
+.btn:active, .step-btn:active, .buff-chip:active, .tab-item:active, .unit-btn:active {
+    transform: scale(0.96);
+    transition: transform 0.05s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
 
-        <div class="mb-md">
-            <label style="display:block; font-weight:bold;">ウイルス (VIRUS)</label>
-            <textarea id="admin-virus" style="width:100%; height:50px; font-family:monospace; font-size:0.8rem;"></textarea>
-        </div>
+.time-wrapper { display: flex; gap: 8px; }
+.btn-now {
+    background: var(--c-primary); color: white; border: none; border-radius: 8px;
+    padding: 0 12px; font-weight: bold; cursor: pointer; font-size: 0.8rem;
+    white-space: nowrap;
+}
 
-        <div class="mb-md">
-            <label style="display:block; font-weight:bold;">敵の耐性 (ENEMIES) <span style="font-size:0.8em; font-weight:normal;">(Lv1, Lv2...)</span></label>
-            <textarea id="admin-enemies" style="width:100%; height:50px; font-family:monospace; font-size:0.8rem;"></textarea>
-        </div>
+/* --- Language Switcher --- */
+.lang-switch { display: flex; gap: 12px; }
+.flag-icon { 
+    width: 36px; height: auto; cursor: pointer; opacity: 0.4; 
+    filter: grayscale(100%); transition: all 0.2s ease; 
+    border-radius: 4px; border: 2px solid transparent;
+}
+.flag-icon.active { 
+    opacity: 1; filter: grayscale(0%); transform: scale(1.1); 
+    border-color: var(--c-primary);
+}
+.unit { font-size: 0.8em; font-weight: normal; margin-left: 1px; }
 
-        <div class="btn-group">
-            <button class="btn" style="background:#2196F3; color:white;" onclick="app.saveAdmin()">データを適用して保存</button>
-            <button class="btn" style="background:#ccc; color:#333;" onclick="app.resetAdmin()">初期値に戻す</button>
-        </div>
-        <button onclick="app.toggleAdmin()" style="margin-top:10px; width:100%; padding:10px;">閉じる</button>
-    </div>
-</div>
+/* =========================================
+   ステッパー & バフボタン用 UI
+   ========================================= */
 
-<script src="script.js"></script>
-</body>
-</html>
+/* ステッパー */
+.stepper-ctrl {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.step-btn {
+    width: 44px;
+    height: 44px;
+    background: #EFEBE9;
+    border: 1px solid var(--c-btn);
+    color: var(--c-primary);
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    transition: background 0.1s;
+}
+
+.step-display {
+    flex: 1;
+    display: flex;
+    align-items: baseline; 
+    justify-content: center;
+    background: #FFF;
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    min-height: 44px;
+    padding: 10px 5px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.1rem;
+    cursor: default;
+    user-select: none;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+/* 数値表示用 */
+.sub-label {
+    font-size: 0.8rem;
+    color: #8D6E63;
+    margin-right: 4px;
+    font-weight: bold;
+}
+.sub-sep {
+    display: inline-block;
+    width: 12px;
+}
+
+.val-lv { font-weight: bold; color: #3E2723; }
+.val-res { font-weight: bold; color: #007AFF; }
+.val-res.buffed { color: #2E7D32; }
+
+/* バフ選択 (トグルボタン) */
+.buff-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.buff-chip {
+    flex: 1;
+    min-width: 140px; 
+    padding: 16px 10px;
+    background: #FFF;
+    border: 1px solid var(--c-border);
+    border-radius: 30px; 
+    color: var(--c-text);
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* コーヒーボタンの強調 */
+#btn-buff-250 span, #btn-buff-500 span {
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+/* スキルボタンの文字サイズ調整 */
+#btn-skill span {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.buff-chip.active {
+    background: #007AFF; 
+    border-color: #007AFF;
+    color: #FFF;
+    box-shadow: 0 3px 8px rgba(0, 122, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+/* --- 非活性化状態 --- */
+.disabled-item {
+    opacity: 0.4;
+    pointer-events: none;
+    filter: grayscale(100%);
+}
+
+/* --- 討伐判定結果 --- */
+.battle-result-box {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    background: #EEE;
+    border: 2px solid #CCC;
+    color: #555;
+    font-family: 'Roboto Mono', monospace;
+    line-height: 1.6;
+}
+.battle-result-box.win {
+    background: #E8F5E9;
+    border-color: #2E7D32;
+    color: #2E7D32;
+}
+.battle-result-box.lose {
+    background: #FFEBEE;
+    border-color: #C62828;
+    color: #C62828;
+}
+
+/* --- タブメニュー用CSS --- */
+.tab-menu {
+    display: flex;
+    gap: 5px;
+}
+.tab-item {
+    flex: 1;
+    padding: 12px;
+    background: #D7CCC8;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    font-weight: bold;
+    color: #5D4037;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    border-bottom: 3px solid transparent;
+}
+.tab-item.active {
+    background: #FFF;
+    color: #BF360C;
+    border-bottom: 3px solid #BF360C;
+}
+.tab-content {
+    animation: fadein 0.3s;
+}
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* --- 強化設定エリア --- */
+.bonus-area {
+    background: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* --- 討伐可能ライン表示ボックス --- */
+.max-win-box {
+    background: #E8F5E9;
+    border: 1px solid #2E7D32;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.max-win-box .label {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #2E7D32;
+    margin-bottom: 6px;
+}
+.max-win-box .value {
+    display: flex;
+    align-items: baseline; 
+    justify-content: center;
+    font-family: 'Roboto Mono', monospace;
+}
