@@ -166,20 +166,20 @@
             </div>
 
             <div class="bonus-area">
-                <label style="text-align:center; margin-bottom:8px; font-size:0.9rem; color:#5D4037;" data-t="lbl_bonus">強化設定 (Buff & Skill)</label>
+                <label style="text-align:center; margin-bottom:12px; font-size:0.9rem; color:#5D4037;" data-t="lbl_bonus">強化設定 (Buff & Skill)</label>
                 
                 <div class="buff-group" style="margin-bottom:12px;">
                     <div class="buff-chip" id="btn-buff-250" onclick="app.toggleBuffBtn(250)">
-                        <span style="font-size:1em;">☕ +250</span>
+                        <span>☕ +250</span>
                     </div>
                     <div class="buff-chip" id="btn-buff-500" onclick="app.toggleBuffBtn(500)">
-                        <span style="font-size:1em;">☕ +500</span>
+                        <span>☕ +500</span>
                     </div>
                 </div>
 
                 <div class="buff-group">
                     <div class="buff-chip" id="btn-skill" onclick="app.toggleSkill()">
-                        <span style="font-size:0.9em; font-weight:bold;" data-t="lbl_skill">戦術スキル (+250)</span>
+                        <span data-t="lbl_skill">戦術スキル (+250)</span>
                     </div>
                 </div>
             </div>
@@ -198,7 +198,8 @@
             <hr style="margin: 20px 0; border:0; border-top:1px dashed #CCC;">
 
             <div style="margin-bottom: 12px;">
-                <label style="text-align:center;"><span data-t="lbl_enemy_lv">敵Lv</span> & <span data-t="lbl_req_res">必要耐性</span> (個別判定)</label>
+                <label style="text-align:center;" data-t="lbl_indiv_check">敵Lv & 必要耐性 (個別判定)</label>
+                
                 <div class="stepper-ctrl">
                     <button class="step-btn" onclick="app.step('enemy', -1)">－</button>
                     <div class="step-display">
