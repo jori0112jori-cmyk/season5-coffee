@@ -430,4 +430,5 @@ input[type="checkbox"] {
     align-items: baseline; 
     justify-content: center;
     font-family: 'Roboto Mono', monospace;
+    gap: 15px; /* ★ここを追加: 要素同士の間隔を広げる */
 }
