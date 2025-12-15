@@ -18,7 +18,7 @@
         </div>
     </header>
 
-    <div class="tab-menu">
+    <div class="tab-menu mb-md">
         <button id="tab-btn-main" class="tab-item active" onclick="app.switchTab('main')" data-t="tab_main">メイン計算</button>
         <button id="tab-btn-battle" class="tab-item" onclick="app.switchTab('battle')" data-t="tab_battle">討伐シミュ</button>
     </div>
@@ -57,8 +57,8 @@
         <div class="card">
             <h2 data-t="h_status">目標設定（カフェイン研究所）</h2>
             
-            <div style="margin-bottom: 12px;">
-                <label data-t="cur_lv" style="text-align:center;">現在ステータス</label>
+            <div class="mb-md">
+                <label data-t="cur_lv" class="text-center">現在ステータス</label>
                 <div class="stepper-ctrl">
                     <button class="step-btn" onclick="app.step('cur', -1)">－</button>
                     <div class="step-display">
@@ -73,8 +73,8 @@
                 <select id="lab-cur" style="display:none;"></select>
             </div>
 
-            <div style="margin-bottom: 12px;">
-                <label data-t="tgt_lv" style="text-align:center;">目標ステータス</label>
+            <div class="mb-md">
+                <label data-t="tgt_lv" class="text-center">目標ステータス</label>
                 <div class="stepper-ctrl">
                     <button class="step-btn" onclick="app.step('tgt', -1)">－</button>
                     <div class="step-display">
@@ -92,7 +92,7 @@
             <div class="grid cols-2">
                 <div>
                     <label data-t="stock">保有量</label>
-                    <input type="text" id="stock" placeholder="0 (1K, 1M...)" 
+                    <input type="text" inputmode="decimal" id="stock" placeholder="0 (1K, 1M...)" 
                            onfocus="this.select()" oninput="app.calc()" 
                            enterkeyhint="done">
                 </div>
@@ -150,8 +150,8 @@
         <div class="card">
             <h2 data-t="h_battle">討伐シミュレーション (敵)</h2>
             
-            <div style="margin-bottom: 15px;">
-                <label style="text-align:center;" data-t="lbl_cur_buffed">現在のステータス (バフ込)</label>
+            <div class="mb-md">
+                <label class="text-center" data-t="lbl_cur_buffed">現在のステータス (バフ込)</label>
                 <div class="stepper-ctrl">
                     <button class="step-btn" onclick="app.step('cur', -1)">－</button>
                     <div class="step-display">
@@ -166,9 +166,9 @@
             </div>
 
             <div class="bonus-area">
-                <label style="text-align:center; margin-bottom:12px; font-size:0.9rem; color:#5D4037;" data-t="lbl_bonus">強化設定 (Buff & Skill)</label>
+                <label class="text-center mb-md" style="color:#5D4037; font-size:0.9rem;" data-t="lbl_bonus">強化設定 (Buff & Skill)</label>
                 
-                <div class="buff-group" style="margin-bottom:12px;">
+                <div class="buff-group mb-md">
                     <div class="buff-chip" id="btn-buff-250" onclick="app.toggleBuffBtn(250)">
                         <span>☕ +250</span>
                     </div>
@@ -195,10 +195,10 @@
                 </div>
             </div>
 
-            <hr style="margin: 20px 0; border:0; border-top:1px dashed #CCC;">
+            <hr class="mb-lg" style="border:0; border-top:1px dashed #CCC;">
 
-            <div style="margin-bottom: 12px;">
-                <label style="text-align:center;" data-t="lbl_indiv_check">敵Lv & 必要耐性 (個別判定)</label>
+            <div class="mb-md">
+                <label class="text-center" data-t="lbl_indiv_check">敵Lv & 必要耐性 (個別判定)</label>
                 
                 <div class="stepper-ctrl">
                     <button class="step-btn" onclick="app.step('enemy', -1)">－</button>
@@ -231,17 +231,17 @@
         <h3 style="margin-top:0;">データ編集</h3>
         <p style="font-size:0.8rem; color:#666;">カンマ区切りで数値を入力してください。</p>
         
-        <div style="margin-bottom:15px;">
+        <div class="mb-md">
             <label style="display:block; font-weight:bold;">必要量 (Required Amount)</label>
             <textarea id="admin-costs" style="width:100%; height:80px; font-family:monospace; font-size:0.8rem;"></textarea>
         </div>
 
-        <div style="margin-bottom:15px;">
+        <div class="mb-md">
             <label style="display:block; font-weight:bold;">ウイルス (VIRUS)</label>
             <textarea id="admin-virus" style="width:100%; height:50px; font-family:monospace; font-size:0.8rem;"></textarea>
         </div>
 
-        <div style="margin-bottom:15px;">
+        <div class="mb-md">
             <label style="display:block; font-weight:bold;">敵の耐性 (ENEMIES) <span style="font-size:0.8em; font-weight:normal;">(Lv1, Lv2...)</span></label>
             <textarea id="admin-enemies" style="width:100%; height:50px; font-family:monospace; font-size:0.8rem;"></textarea>
         </div>
