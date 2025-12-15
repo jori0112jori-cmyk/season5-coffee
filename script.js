@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション (終末精鋭)", 
+            h_battle: "討伐シミュレーション (敵)", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -23,10 +23,11 @@ const DEFAULT_DATA = {
             lbl_res: "耐性:",
             
             lbl_cur_buffed: "現在のステータス (バフ込)",
-            lbl_next_target: "次の目標 (NEXT TARGET)",
-            lbl_req_res: "必要耐性",
-            lbl_skill: "戦術スキル: 悪魔狩・怪物殺し (+250)",
-            lbl_max_win: "討伐可能ライン (安全)",
+            // ★変更点: 一括翻訳用のキー
+            lbl_indiv_check: "終末精鋭Lv & 必要耐性 (個別判定)",
+            
+            lbl_skill: "戦術スキル: 悪魔狩・怪物殺し +250",
+            lbl_max_win: "討伐可能ライン (最大)",
             lbl_bonus: "強化設定 (Buff & Skill)",
             
             res_over: "超過",
@@ -67,9 +68,10 @@ const DEFAULT_DATA = {
             lbl_res: "Res:",
 
             lbl_cur_buffed: "Current Status (Buffed)",
-            lbl_enemy_lv: "Enemy Lv",
-            lbl_req_res: "Req Res",
-            lbl_skill: "Tactical Skill: Monster Slayer (+250)",
+            // ★変更点: 一括翻訳用のキー
+            lbl_indiv_check: "Doom Elite Lv & Req Res (Individual)",
+            
+            lbl_skill: "Tactical Skill: Monster Slayer +250",
             lbl_max_win: "Max Defeatable Limit",
             lbl_bonus: "Bonus Settings (Buff & Skill)",
 
@@ -100,6 +102,7 @@ let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENE
 // 配列の安全確保
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
+// Lv120まで確保
 while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
 
 /* --- App Logic --- */
@@ -408,7 +411,6 @@ const app = (() => {
         
         const safeNextTarget = (nextTargetLv <= realMax) ? nextTargetLv : realMax;
 
-        // ★修正: resetTarget(手動以外の変化) または 現在値が既討伐Lv以下なら更新
         if (resetTarget || enemyLv <= maxWinLv) {
             enemyLv = safeNextTarget;
             $('enemy-lv').value = enemyLv;
