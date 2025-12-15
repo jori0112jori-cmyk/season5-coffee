@@ -70,7 +70,7 @@ const DEFAULT_DATA = {
             lbl_cur_buffed: "Current Status (Buffed)",
             lbl_enemy_lv: "Doom Elite Lv",
             lbl_req_res: "Req Res",
-            lbl_skill: "Tactical Skill: Monster Slayer +250",
+            lbl_skill: "Tactical Skill: Monster Slayer (+250)",
             lbl_max_win: "Max Defeatable Limit",
             lbl_bonus: "Bonus Settings (Buff & Skill)",
             lbl_indiv_check: "Enemy Lv & Req Res (Individual)",
