@@ -15,7 +15,7 @@ const DEFAULT_DATA = {
             time: "基準時刻", 
             h_status: "目標設定（カフェイン研究所）",
             h_buff: "コーヒーバフ (ウイルス耐性)", 
-            h_battle: "討伐シミュレーション ", 
+            h_battle: "討伐シミュレーション", 
             
             cur_lv: "現在ステータス",
             tgt_lv: "目標ステータス",
@@ -60,7 +60,7 @@ const DEFAULT_DATA = {
             time: "Base Time", 
             h_status: "Goal Setting (Caffeine Inst.)",
             h_buff: "Coffee Buff (Virus Res.)",
-            h_battle: "Battle Sim ",
+            h_battle: "Battle Sim (Enemy)",
 
             cur_lv: "Current Status",
             tgt_lv: "Target Status",
@@ -70,7 +70,7 @@ const DEFAULT_DATA = {
             lbl_cur_buffed: "Current Status (Buffed)",
             lbl_enemy_lv: "Doom Elite Lv",
             lbl_req_res: "Req Res",
-            lbl_skill: "Tactical Skill: Monster Slayer +250",
+            lbl_skill: "Tactical Skill: Monster Slayer (+250)",
             lbl_max_win: "Max Defeatable Limit",
             lbl_bonus: "Bonus Settings (Buff & Skill)",
             lbl_indiv_check: "Enemy Lv & Req Res (Individual)",
@@ -99,6 +99,7 @@ const DEFAULT_DATA = {
 };
 
 let DATA = { COSTS: [...DEFAULT_DATA.COSTS], VIRUS: [...DEFAULT_DATA.VIRUS], ENEMIES: [...DEFAULT_DATA.ENEMIES], TEXT: DEFAULT_DATA.TEXT };
+// 配列の安全確保
 while(DATA.COSTS.length <= 60) DATA.COSTS.push(0);
 while(DATA.VIRUS.length <= 60) DATA.VIRUS.push(0);
 while(DATA.ENEMIES.length <= 120) DATA.ENEMIES.push(0);
@@ -139,7 +140,7 @@ const app = (() => {
             }, 50);
         } catch(err) {
             console.error("Init Error:", err);
-            alert("初期化エラー");
+            alert("初期化エラーが発生しました。リセットボタンを押すか、キャッシュをクリアしてください。");
         }
     };
 
@@ -330,6 +331,24 @@ const app = (() => {
             tEl.value = Math.min(cLv + 1, CONFIG.MAX_LV);
         }
         calc(true);
+    };
+
+    const addUnit = (unit) => {
+        const el = $('stock');
+        if (!el) return;
+        el.value = (el.value || "") + unit;
+        calc();
+        el.focus();
+    };
+
+    // ★修正: バックスペース機能
+    const backspace = () => {
+        const el = $('stock');
+        if (!el) return;
+        const val = el.value || "";
+        el.value = val.slice(0, -1);
+        calc();
+        el.focus();
     };
 
     const calc = (resetTarget = false) => {
@@ -590,7 +609,6 @@ const app = (() => {
         }
     };
 
-    // ★改善: リセット時に確認ダイアログを表示
     const reset = () => {
         if(confirm('設定をリセットしますか？\n(OK=通常リセット / キャンセル=中断)')) { 
             localStorage.removeItem(CONFIG.SAVE_KEY); 
@@ -637,11 +655,10 @@ const app = (() => {
         }
     };
     
-    // Explicitly expose to window to ensure HTML inline events work
     window.app = { 
         init, calc, save, reset, setLang, setNow, onCurChange, 
         toggleAdmin, saveAdmin, resetAdmin, 
-        toggleBuffBtn, step, toggleWeekly, switchTab, toggleSkill
+        toggleBuffBtn, step, toggleWeekly, switchTab, toggleSkill, addUnit, backspace
     };
     
     return window.app;
