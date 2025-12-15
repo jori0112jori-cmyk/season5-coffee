@@ -7,8 +7,8 @@ const DEFAULT_DATA = {
     TEXT: {
         ja: { 
             title: "コーヒー生産計算機", 
-            tab_main: "メイン計算",
-            tab_battle: "討伐シミュ",
+            tab_main: "生産計算",
+            tab_battle: "討伐シミュレータ",
 
             h_prod: "生産設定", 
             weekly: "週間配達", 
