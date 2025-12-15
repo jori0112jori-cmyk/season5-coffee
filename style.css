@@ -168,7 +168,7 @@ input[type="checkbox"] {
    ステッパー & バフボタン用 UI
    ========================================= */
 
-/* ステッパー (レベル選択) */
+/* ステッパー */
 .stepper-ctrl {
     display: flex;
     align-items: center;
@@ -199,21 +199,23 @@ input[type="checkbox"] {
     background: #D7CCC8;
 }
 
+/* ★修正箇所: 中央寄せをやめて、ベースライン揃えに変更 */
 .step-display {
     flex: 1;
     display: flex;
-    align-items: center; 
+    align-items: baseline; /* 文字の底辺を揃える */
     justify-content: center;
     background: #FFF;
     border: 1px solid var(--c-border);
     border-radius: 8px;
-    height: 44px;
-    padding: 0 5px;
+    min-height: 44px; /* 高さを固定せず最小値に */
+    padding: 10px 5px; /* 上下のパディングで中央に見せる */
     font-family: 'Roboto Mono', monospace;
     font-size: 1.1rem;
     cursor: default;
     user-select: none;
     white-space: nowrap;
+    box-sizing: border-box; /* パディングを含める */
 }
 
 /* 数値表示用 */
@@ -222,8 +224,7 @@ input[type="checkbox"] {
     color: #8D6E63;
     margin-right: 4px;
     font-weight: bold;
-    position: relative;
-    top: 1px; 
+    /* position: relative; top: 1px;  <- ズレの原因になるので削除 */
 }
 .sub-sep {
     display: inline-block;
@@ -244,13 +245,13 @@ input[type="checkbox"] {
 .buff-chip {
     flex: 1;
     min-width: 140px; 
-    padding: 12px 10px;
+    padding: 16px 10px;
     background: #FFF;
     border: 1px solid var(--c-border);
     border-radius: 30px; 
     color: var(--c-text);
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     cursor: pointer;
     text-align: center;
     transition: all 0.2s;
@@ -260,11 +261,24 @@ input[type="checkbox"] {
     align-items: center;
 }
 
+/* コーヒーボタンの強調 */
+#btn-buff-250 span, #btn-buff-500 span {
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+/* スキルボタンの文字サイズ調整 */
+#btn-skill span {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
 .buff-chip.active {
     background: #007AFF; 
     border-color: #007AFF;
     color: #FFF;
-    box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+    box-shadow: 0 3px 8px rgba(0, 122, 255, 0.4);
+    transform: translateY(-1px);
 }
 
 /* --- 非活性化状態 --- */
@@ -326,12 +340,12 @@ input[type="checkbox"] {
     to   { opacity: 1; }
 }
 
-/* --- ★追加: 強化設定エリアのスタイル --- */
+/* --- 強化設定エリア --- */
 .bonus-area {
     background: #F5F5F5;
     border: 1px solid #E0E0E0;
     border-radius: 8px;
-    padding: 12px;
+    padding: 15px;
     margin-bottom: 15px;
 }
 
@@ -352,7 +366,7 @@ input[type="checkbox"] {
 }
 .max-win-box .value {
     display: flex;
-    align-items: center;
+    align-items: baseline; /* ここもベースライン揃えに */
     justify-content: center;
     font-family: 'Roboto Mono', monospace;
 }
